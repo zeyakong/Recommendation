@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="../static/style.css">
+    <title>Restaurant Recommendation</title>
+</head>
+<body>
+<div id="content_1">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">Restaurant Recommendation</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto"></ul>
+                <div class="form-inline">
+                    {% if user.is_authenticated %}
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-secondary" disabled>{{ user.username }}</button>
+                            <a href="{% url 'logout' %}?next={{ request.path }}"
+                               class="btn btn-outline-warning">Logout</a>
+                        </div>
+                    {% else %}
+                        <a class="btn btn-outline-secondary" href="{% url 'login' %}?next={{ request.path }}">Login</a>
+                        <a class="btn btn-success ml-3" href="{% url 'users:register' %}?next={{ request.path }}">Sign
+                            Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </nav>
+    <div class="container">
+        {#        <h1 class="text-center" style="padding-top: 230px;font-weight: bold;">Restaurant Recommendation</h1>#}
+        <form method='get' class="form-inline mx-auto" action="/restaurant/search/"
+              style="width: 80%;margin-top: 300px;">
+            {% csrf_token %}
+            <div class="input-group" style="width: 85%;">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3" style="font-weight: bold">Find</span>
+                </div>
+                <input class="form-control" type="text" placeholder="Restaurant Name/Category" name="q"
+                       aria-describedby="basic-addon3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon3" style="font-weight: bold">Near</span>
+                </div>
+                <input class="form-control" type="text" placeholder="Address" name="n" aria-describedby="basic-addon3">
+            </div>
+            <button type="submit" class="btn btn-primary ml-1" style="width: 10%">Search</button>
+        </form>
+    </div>
+</div>
+
+<div id="content_2">
+    <div class="container">
+        <p>
+        <h1 class="text-center">Get Started</h1>
+        <h5 class="mt-4">1. Sign up and login to the system.</h5>
+        <br>
+        <h5>2. Search the restaurant.</h5>
+        <br>
+        <h5>3. Give some reviews（text and stars） to those restaurants you searched.</h5>
+        <br>
+        <h5>4. Generate the recommendation report.</h5>
+        <br>
+        *The data-set is from the
+        <button class="btn btn-sm btn-outline-info">www.yelp.com</button>
+        .
+        </p>
+    </div>
+</div>
+
+<div id="content_3">
+    <div class="container">
+        <p>
+        <h1 class="text-center mb-4">About</h1>
+        This system chose 1619 restaurant samples which located in Wisconsin from the yelp data-set, which includes
+        26552 customers and 82510
+        reviews related to those restaurants.
+        All of those are training data.
+        <br>
+        <br>
+        The aim of this project is to develop a web application to do recommendation
+        according to the those review and rating. This system will combine machine
+        learning rating analysis and nature language processing to do the prediction.
+        </p>
+    </div>
+</div>
+
+<div id="footer">
+    <p class="text-center">&copy; Zeya Kong
+        <br>for Capstone Project</p>
+</div>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+<script src="../static/index.js"></script>
+</body>
+</html>
