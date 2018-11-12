@@ -8,7 +8,6 @@ sim_distance = 0
 training_data = []
 matrix = []
 
-
 # test_data = []
 
 def start():
@@ -16,7 +15,7 @@ def start():
     matrix = load_data()
     # np.seterr(divide='ignore', invalid='ignore')
 
-
+    # test
     print("Finish Loading. the matrix shape:", len(matrix), len(matrix[0]))
     print("restaurants: ", len(matrix))
     print("users: ", len(matrix[0]))
