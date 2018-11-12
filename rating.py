@@ -17,7 +17,6 @@ def start():
     # np.seterr(divide='ignore', invalid='ignore')
 
 
-
     print("Finish Loading. the matrix shape:", len(matrix), len(matrix[0]))
     print("restaurants: ", len(matrix))
     print("users: ", len(matrix[0]))
