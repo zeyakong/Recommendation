@@ -6,16 +6,43 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import wordnet
 from nltk.stem import PorterStemmer
 from collections import Counter
+from sklearn.feature_extraction.text import CountVectorizer
 import matplotlib.pyplot as plt
 import pandas as pd
+import pickle
 
 
-def get_text_list():
-    result = []
+def get_data():
+    text_list = []
+    user_list = []
+    busi_list = []
     review_list = Review.objects.all()
     for var in review_list:
-        result.append(var.text)
-    return result
+        text_list.append(var.text)
+        user_list.append(var.user_id)
+        busi_list.append(var.business_id)
+    return text_list, user_list, busi_list
+
+
+def get_text():
+    text_list = []
+    # user_list = []
+    # busi_list = []
+    review_list = Review.objects.all()
+    for var in review_list:
+        text_list.append(var.text)
+        # user_list.append(var.user_id)
+        # busi_list.append(var.business_id)
+    return text_list
+
+
+def load_pickle(file):
+    print("Load the rating matrix...")
+    pkl_file = open(file, 'rb')
+    data = pickle.load(pkl_file)
+    # pprint.pprint(data)
+    pkl_file.close()
+    return data
 
 
 def get_keywords(input_text):
@@ -38,23 +65,56 @@ def get_keywords(input_text):
 
 def start():
     # nltk.download()
+    rating_matrix = load_pickle()
+    maps = np.zeros(rating_matrix.shape)
 
-    text_list = get_text_list()
+    # get all this categories business
+    business_list = Business.objects.all()
+    # user_list = Customer.objects.all()
+    review_list = Review.objects.all()
+
+    blist = []
+    for var in business_list:
+        blist.append(var.business_id)
+
+    ulist = []
+    for var in review_list:
+        if var.user_id not in ulist:
+            ulist.append(var.user_id)
+
+    text_list, uid_list, rid_list = get_data()
     print('Get', len(text_list), 'text reviews.\nStart finding keywords for each review...')
+    #
+    for i in range(len(uid_list)):
+        res_index = blist.index(rid_list[i])
+        user_index = ulist.index(uid_list[i])
+        maps[res_index][user_index] = i
 
-    words_list = list()
-    for one in text_list[0:2000]:
-        words_list = words_list + get_keywords(one)
-    print('Finished! len of the words list', len(words_list))
+    print(maps)
+    output = open('maps.pkl', 'wb')
+    pickle.dump(maps, output)
+    output.close()
+
+    # words_list = list()
+    # for one in text_list[0:1000]:
+    #     words_list = words_list + get_keywords(one)
+    # print('Finished! len of the words list', len(words_list))
     # print()
-    fre = Counter(words_list)
-    print(len(fre))
-    fre = fre.most_common(15)
-    x, y = zip(*fre)
-    plt.figure(figsize=(15, 8))
-    plt.bar(x,y,edgecolor='black')
-    plt.ylabel('Times')
-    plt.xlabel('Word')
+
+    # vectorizer = CountVectorizer()
+    # X = vectorizer.fit_transform(text_list)
+    # print(vectorizer.get_feature_names())
+    # print(X.toarray().shape)
+
+    # fre = Counter(words_list)
+    # print(len(fre))
+
+    # fre = fre.most_common(15)
+    # x, y = zip(*fre)
+    # plt.figure(figsize=(15, 8))
+    # plt.bar(x,y,edgecolor='black')
+    # plt.ylabel('Times')
+    # plt.xlabel('Word')
     # print(fre)
     # for one in fre:
     #     print(one)
@@ -65,13 +125,63 @@ def start():
 
     # df.plot(kind='bar')
 
+    # plt.show()
+
+
+def get_words_vec():
+    text_list = get_text()
+    # text_list = ['I like you free good',
+    #              'I hate you bade good',
+    #              'how are you, good ,street bade ']
+    vectorizer = CountVectorizer(max_features=2000, lowercase=True, stop_words='english')
+    X = vectorizer.fit_transform(text_list)
+
+    # print(vectorizer.get_feature_names())
+    # print(X.toarray().shape)
+
+    # print(vectorizer.vocabulary_)
+    # output = open('word2vec.pkl', 'wb')
+    # pickle.dump(X.toarray(), output)
+    # output.close()
+
+
+def print_top_n_words():
+    text_list = get_text()
+    vectorizer = CountVectorizer(max_features=2000, lowercase=True, stop_words='english')
+    X = vectorizer.fit_transform(text_list)
+    sum_words = X.sum(axis=0)
+    words_freq = [(word, sum_words[0, idx]) for word, idx in vectorizer.vocabulary_.items()]
+    words_freq = sorted(words_freq, key=lambda x: x[1], reverse=True)
+    # print(type(words_freq))
+    x = []
+    y = []
+    for one in words_freq[0:15]:
+        x.append(one[0])
+        y.append(one[1])
+    plt.figure(figsize=[12, 7])
+    plt.bar(x, y)
     plt.show()
 
 
+def test():
+    # maps[r_index][u_index] = text_index
+    maps = load_pickle('maps.pkl')
+    # rm: rating matrix . rm[r_index][u_index] = rating(1~5)
+    rm = load_pickle('matrix.pkl')
+    # for i in range(len(rm[45])):
+    #     if rm[45][i]>0:
+    #         print(i)
+    # print(maps[45][26145])
+
+
 if __name__ == '__main__':
-    start()
+    # a = load_pickle('word2vec.pkl')
+    # print(a)
+    # start()
+    # get_words_vec()
     # sr = stopwords.words('english')
     # print(sr)
+    # test()
     # test_str = "I won't like this working work street. I played football played by others"
     # print(get_keywords(test_str))
     exit()
