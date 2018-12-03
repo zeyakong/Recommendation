@@ -13,7 +13,7 @@ matrix = []
 
 def start():
     global matrix, training_data, similarity_rest, similarity_user
-    matrix = load_data()
+    matrix = load_data('matrix.pkl')
     np.seterr(divide='ignore', invalid='ignore')
 
     # test
@@ -51,7 +51,7 @@ def start():
     # print(average, "count:", count)
 
     print("\nNow test the accuracy:")
-    test(100)
+    test_add_nlp(10)
     print("Want to predict manually?(y/n)")
     strs = input()
     if strs == 'y':
@@ -66,9 +66,9 @@ def start():
     # print(get_recommendations(matrix, person))
 
 
-def load_data():
-    print("Load the rating matrix...")
-    pkl_file = open('matrix.pkl', 'rb')
+def load_data(file):
+    print("Load the ", file, " matrix...")
+    pkl_file = open(file, 'rb')
 
     data = pickle.load(pkl_file)
     # pprint.pprint(data)
@@ -130,6 +130,56 @@ def get_similarity_list(matrix, index, tar):
     return list1, list2, list3
 
 
+def get_euclidean_similarity_list(matrix, index, tar):
+    list1 = []
+    for i in range(0, len(matrix)):
+        temp_1 = []
+        temp_2 = []
+        if i != index and matrix[i][tar] > 0:
+            # get common vector value
+            for j in range(0, len(matrix[i])):
+                if matrix[index][j] > 0 and matrix[i][j] > 0:
+                    temp_1.append(matrix[index][j])
+                    temp_2.append(matrix[i][j])
+            if len(temp_1) > 0 and len(temp_2) > 0:
+                vector1 = np.array(temp_1)
+                vector2 = np.array(temp_2)
+                # print(vector1,'\n',vector2)
+
+                s1 = o_similarity(vector1, vector2)
+                list1.append(s1)
+            else:
+                list1.append(0)
+        else:
+            list1.append(0)
+    return list1
+
+
+def get_text_euclidean_similarity_list(maps,word2vec,index, tar):
+    list1 = []
+    for i in range(0, len(maps)):
+        temp_1 = []
+        temp_2 = []
+        if i != index and maps[i][tar] > -1:
+            # get common vector value
+            for j in range(0, len(maps[i])):
+                if word2vec[int(maps[index][j])] > 0 and word2vec[int(maps[i][j])] > 0:
+                    temp_1.append(word2vec[int(maps[index][j])])
+                    temp_2.append(word2vec[int(maps[i][j])])
+            if len(temp_1) > 0 and len(temp_2) > 0:
+                vector1 = np.array(temp_1)
+                vector2 = np.array(temp_2)
+                # print(vector1,'\n',vector2)
+
+                s1 = o_similarity(vector1, vector2)
+                list1.append(s1)
+            else:
+                list1.append(0)
+        else:
+            list1.append(0)
+    return list1
+
+
 def liner_classification():
     pass
 
@@ -158,6 +208,51 @@ def predict_one():
         print("Dose it exist a real rating? No")
 
 
+def test_add_nlp(size):
+    print("Start Testing. Whole testing round:", size)
+    r_e_records = []
+    t_e_records = []
+    r_e_error = []
+    t_e_error = []
+    for i in range(0, size):
+        # get a random user index
+        uid = random.randint(0, len(matrix[0]))
+        # print("Testing round:", i, ",the random user", uid, "...")
+        # get a random real rating index and hide this to predict.
+        rid = random.sample([j for j, e in enumerate(np.array(matrix).T[uid]) if e != 0], 1)[0]
+        real_score = matrix[rid][uid]
+        # print(real_score)
+        r_e_score = predict_euclidean(rid, uid)
+        wm = load_data('word2vec.pkl')
+        maps = load_data('maps.pkl')
+        t_e_score = predict_text_euclidean(restaurant_index=rid, user_index=uid,maps=maps,wm=wm)
+        print(t_e_score)
+
+        # records parameters:[user_index , restaurant_index , real_rank, predict_rank]
+        one = [uid, rid, real_score, r_e_score]
+        # two = [uid, rid, real_score, e_score]
+        r_e_records.append(one)
+        # t_e_records.append(two)
+        # pearson_records.append(three)
+        # o_error.append(abs(real_score - o_score))
+        # cos_error.append(abs(real_score - cos_score))
+        # pearson_error.append(abs(real_score - pearson_score))
+
+    print("After test the", size, "samples, Root mean squared error (RMSE) achieved:")
+    print("Using (rating)Euclidean distance:", RMSE(r_e_records))
+    # print("Using (text)Euclidean distance:", RMSE(t_e_records))
+    print('Error distribution for each approach:')
+    # bins = np.linspace(0, 10, 10)
+    # plt.hist([o_error, cos_error, pearson_error], alpha=0.5, label=['E', 'c', 'P'])
+    # plt.hist(, bins, alpha=0.5, label='cosine')
+    # plt.hist(, bins, alpha=0.5, label='Pearson')
+    # plt.title("Density Histogram")
+    # plt.xlabel("error")
+    # plt.ylabel("sample count")
+    # plt.legend(loc='upper right')
+    # plt.show()
+
+
 def test(size=200):
     print("Start Testing. Whole testing round:", size)
     o_records = []
@@ -182,7 +277,7 @@ def test(size=200):
         o_records.append(one)
         cos_records.append(two)
         pearson_records.append(three)
-        o_error.append(abs(real_score-o_score))
+        o_error.append(abs(real_score - o_score))
         cos_error.append(abs(real_score - cos_score))
         pearson_error.append(abs(real_score - pearson_score))
 
@@ -192,7 +287,7 @@ def test(size=200):
     print("Using pearson:", RMSE(pearson_records))
     print('Error distribution for each approach:')
     # bins = np.linspace(0, 10, 10)
-    plt.hist([o_error,cos_error,pearson_error],  alpha=0.5, label=['E', 'c','P'])
+    plt.hist([o_error, cos_error, pearson_error], alpha=0.5, label=['E', 'c', 'P'])
     # plt.hist(, bins, alpha=0.5, label='cosine')
     # plt.hist(, bins, alpha=0.5, label='Pearson')
     plt.title("Density Histogram")
@@ -245,6 +340,31 @@ def predict(restaurant_index, user_index, algorithm):
         return cos_score
     else:
         return o_score, cos_score, pearson_score
+
+
+def predict_euclidean(restaurant_index, user_index):
+    o_sim_rest_list = get_euclidean_similarity_list(training_data,
+                                                    int(restaurant_index),
+                                                    int(user_index))
+    training_data_transpose = training_data.transpose()
+    o_sim_user_list = get_euclidean_similarity_list(training_data_transpose,
+                                                    int(user_index),
+                                                    int(restaurant_index))
+
+    o_sim_rest_index_list = np.array(o_sim_rest_list).argsort()[::-1]
+    o_sim_user_index_list = np.array(o_sim_user_list).argsort()[::-1]
+    o_score = get_score(restaurant_index, user_index, o_sim_user_index_list, o_sim_rest_index_list)
+    return o_score
+
+
+def predict_text_euclidean(restaurant_index, user_index,maps,wm):
+    sim_res_list = get_text_euclidean_similarity_list(maps=maps,word2vec=wm,index=int(restaurant_index),tar=int(user_index))
+    sim_user_list = get_text_euclidean_similarity_list(maps=maps.transpose(),word2vec=wm,tar=int(restaurant_index),index=int(user_index))
+    o_sim_rest_index_list = np.array(sim_res_list).argsort()[::-1]
+    o_sim_user_index_list = np.array(sim_user_list).argsort()[::-1]
+    o_score = get_score(restaurant_index, user_index, o_sim_user_index_list, o_sim_rest_index_list)
+    return o_score
+
 
 
 def get_score(restaurant_index, user_index, sim_user_index_list, sim_rest_index_list):

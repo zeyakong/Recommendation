@@ -6,7 +6,7 @@ from django.db.models import Q
 import pickle
 
 
-def recommend():
+def save():
     # q = Q()
     #
     # for var in category_list:

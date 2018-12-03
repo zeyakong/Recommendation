@@ -175,8 +175,9 @@ def test():
 
 
 if __name__ == '__main__':
-    # a = load_pickle('word2vec.pkl')
-    # print(a)
+    a = load_pickle('maps.pkl')
+    print(a)
+    print('shape',a.shape)
     # start()
     # get_words_vec()
     # sr = stopwords.words('english')
