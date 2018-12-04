@@ -13,7 +13,7 @@ matrix = []
 
 def start():
     global matrix, training_data, similarity_rest, similarity_user
-    matrix = load_data('matrix.pkl')
+    matrix = load_data('rm.pkl')
     np.seterr(divide='ignore', invalid='ignore')
 
     # test
@@ -51,7 +51,7 @@ def start():
     # print(average, "count:", count)
 
     print("\nNow test the accuracy:")
-    test_add_nlp(10)
+    # test_add_nlp(10)
     print("Want to predict manually?(y/n)")
     strs = input()
     if strs == 'y':
