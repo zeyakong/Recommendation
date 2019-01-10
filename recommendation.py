@@ -3,6 +3,7 @@ import numpy as np
 import math
 import random
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
 
 def load_pickle(pickle_name):
@@ -48,27 +49,28 @@ def start():
     # maps.shape == rm.shape. maps[rid][uid] = index of wm. many-to-one relationship
     # rid: restaurant id. range(0,1,2,...,1600+)
     # uid: user(customer) id. range(0,1,2,...,20000+)
-    rm = load_pickle('rm.pkl')
-    wm = load_pickle('wm.pkl')
-    maps = load_pickle('maps.pkl')
 
-    # a = rm_find_sim_row_list(rm=rm, row=141, column=80)
-    # print(type(rm))
-    print('real', rm[174][16])
-    print('predict', rm_predict(rid=174, uid=16, rm=rm))
+    # test one data rid=141 , uid = 80
+    # wm_find_sim_row_list(wm=wm,row=141,column=80,maps=maps)
+    # rm_find_sim_row_list(rm=rm,row=141,column=80)
+
+    # test_acc(size=200)
+    # test_bag_of_words(size=200)
+    # test_TFIDF(size=200)
+    test_bag_TFIDF(size=200)
 
 
 def rm_predict(rid, uid, rm):
     # find similar user list
     sim_user = rm_find_sim_row_list(rm=rm.T, row=uid, column=rid)
     # find similar restaurant list
-    sim_rest = rm_find_sim_row_list(rm=rm,row=rid, column=uid)
+    sim_rest = rm_find_sim_row_list(rm=rm, row=rid, column=uid)
     # chose top 30 similar users and restaurants' score and get the average.
-    score = get_score(rest_id=rid,user_id=uid,sim_rest_index_list=sim_rest,sim_user_index_list=sim_user,rm=rm)
+    score = get_score(rest_id=rid, user_id=uid, sim_rest_index_list=sim_rest, sim_user_index_list=sim_user, rm=rm)
     return score
 
 
-def get_score(rest_id, user_id, sim_user_index_list, sim_rest_index_list,rm):
+def get_score(rest_id, user_id, sim_user_index_list, sim_rest_index_list, rm):
     # find the average score for 30 similar users chose this restaurant.
     count = 0
     number = 0
@@ -108,6 +110,8 @@ def rm_find_sim_row_list(rm, row, column):
             sim_score = euclidean_sim(vector1=v1, vector2=v2)
             result[i] = sim_score
     temp = sorted(result.items(), key=lambda kv: kv[1])
+    # print(temp)
+    # return the list of similar rows of the matrix(from high to low).
     return [i[0] for i in temp]
 
 
@@ -122,22 +126,314 @@ def find_2vector_nonzero_sub(v1, v2, ignore_index):
     return np.array(temp_1), np.array(temp_2)
 
 
-# def wm_find_sim_row_list(wm, maps, row, column):
-#     result = dict()
-#     for i in range(len(maps)):
-#         if maps[i][column] > -1 and i != row:
-#             v1, v2 = find_2vector_nonzero_sub(v1=rm[i], v2=rm[row], ignore_index=column)
-#
-#             sim_score = euclidean_sim(vector1=v1, vector2=v2)
-#             result[i] = sim_score
-#     temp = sorted(result.items(), key=lambda kv: kv[1])
-#     return [i[0] for i in temp]
-#     pass
+def wm_find_sim_row_list(wm, maps, row, column):
+    result = dict()
+    for i in range(len(maps)):
+        if maps[i][column] > 0 and i != row:
+            # v1, v2 = find_2vector_nonzero_sub(v1=rm[i], v2=rm[row], ignore_index=column)
+            score = 0
+            count = 0
+            for j in range(len(maps[i])):
+                if maps[i][j] > 0 and maps[row][j] > 0:
+                    # find the commen index review
+                    # print('find row',i,'and row',row,'have same column', j)
+                    textvec1 = wm[int(maps[i][j])]
+                    textvec2 = wm[int(maps[row][j])]
+                    sim_score = cosine_sim(vector1=np.array(textvec1), vector2=np.array(textvec2))
+                    score = score + sim_score
+                    count += 1
+            result[i] = score / count
+    temp = sorted(result.items(), key=lambda kv: -kv[1])
+    # print(temp)
+    return [i[0] for i in temp]
 
 
-def wm_predict(rid, uid, maps, wm):
+def wm_predict(rid, uid, maps, wm, rm):
+    # find similar user list
+    sim_user = wm_find_sim_row_list(wm=wm, maps=maps.T, row=uid, column=rid)
+    # find similar restaurant list
+    sim_rest = wm_find_sim_row_list(wm=wm, maps=maps, row=rid, column=uid)
+    # chose top 30 similar users and restaurants' score and get the average.
+    score = get_score(rest_id=rid, user_id=uid, sim_rest_index_list=sim_rest, sim_user_index_list=sim_user, rm=rm)
+    return score
 
-    pass
+
+def test_acc(size=10):
+    rm = load_pickle('rm.pkl')
+    wm = load_pickle('wm.pkl')
+    maps = load_pickle('maps.pkl')
+    print("Start Testing. Whole testing round:", size)
+
+    # r: rating-based , t: text-based
+    r_records = []
+    t_records = []
+    r_error = []
+    t_error = []
+
+    # for each epoch
+    for i in range(0, size):
+        # get a random user index
+        uid = random.randint(0, len(rm[0]))
+
+        # get a random real rating index and hide this to predict.
+        rid = random.sample([j for j, e in enumerate(np.array(rm).T[uid]) if e != 0], 1)[0]
+        real_score = rm[rid][uid]
+        # print(real_score)
+        r_score = rm_predict(rid=rid, uid=uid, rm=rm)
+        t_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=wm, maps=maps)
+
+        # records parameters:[user_index , restaurant_index , real_rank, predict_rank]
+        one = [uid, rid, real_score, r_score]
+        two = [uid, rid, real_score, t_score]
+
+        print("Round:", i)
+
+        r_records.append(one)
+        t_records.append(two)
+        r_error.append(abs(real_score - r_score))
+        t_error.append(abs(real_score - t_score))
+
+    print("After test the", size, "samples, mean absolute error (MAE) achieved:")
+    print("rating-based:", MAE(r_records))
+    print("text-based:", MAE(t_records))
+    print('Error distribution for each approach:')
+    # print(r_error)
+    # print(t_error)
+
+    # plot line histogram diagram
+    # y, binEdges = np.histogram(r_error, bins=1)
+    # bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
+    # plt.plot(bincenters, y, '-')
+    # plt.show()
+
+    plt.figure(figsize=[12, 7])
+    plt.hist([r_error, t_error], label=['rating-based', 'text-based'], alpha = 0.7)
+    plt.title("Histogram: 200 sample")
+    plt.xlabel("error")
+    plt.ylabel("sample count")
+    plt.legend(loc='upper right')
+    plt.show()
+
+
+def test_bag_of_words(size=10):
+    print("Start Testing. Whole testing round:", size)
+
+    rm = load_pickle('rm.pkl')
+    bag_2000 = load_pickle('bag_of_words_2000.pkl')
+    bag_1000 = load_pickle('bag_of_words_1000.pkl')
+    bag_500 = load_pickle('bag_of_words_500.pkl')
+    bag_200 = load_pickle('bag_of_words_200.pkl')
+    maps = load_pickle('maps.pkl')
+
+    # bag_of_words
+    bag_2000_records = []
+    bag_1000_records = []
+    bag_500_records = []
+    bag_200_records = []
+    bag_2000_error = []
+    bag_1000_error = []
+    bag_500_error = []
+    bag_200_error = []
+
+    # for each epoch
+    for i in range(0, size):
+        # get a random user index
+        uid = random.randint(0, len(rm[0]))
+
+        # get a random real rating index and hide this to predict.
+        rid = random.sample([j for j, e in enumerate(np.array(rm).T[uid]) if e != 0], 1)[0]
+        real_score = rm[rid][uid]
+        # print(real_score)
+        # r_score = rm_predict(rid=rid, uid=uid, rm=rm)
+
+        bag_2000_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=bag_2000, maps=maps)
+        bag_1000_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=bag_1000, maps=maps)
+        bag_500_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=bag_500, maps=maps)
+        bag_200_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=bag_200, maps=maps)
+
+        # records parameters:[user_index , restaurant_index , real_rank, predict_rank]
+        one = [uid, rid, real_score, bag_2000_score]
+        two = [uid, rid, real_score, bag_1000_score]
+        three = [uid, rid, real_score, bag_500_score]
+        four = [uid, rid, real_score, bag_200_score]
+
+        print("Round:", i)
+
+        bag_2000_records.append(one)
+        bag_1000_records.append(two)
+        bag_500_records.append(three)
+        bag_200_records.append(four)
+        bag_2000_error.append(abs(real_score - bag_2000_score))
+        bag_1000_error.append(abs(real_score - bag_1000_score))
+        bag_500_error.append(abs(real_score - bag_500_score))
+        bag_200_error.append(abs(real_score - bag_200_score))
+
+    print("After test the", size, "samples, mean absolute error (MAE) achieved:")
+    print("bag_2000:", MAE(bag_2000_records))
+    print("bag_1000:", MAE(bag_1000_records))
+    print("bag_500:", MAE(bag_500_records))
+    print("bag_200:", MAE(bag_200_records))
+    print('Error distribution for each approach:')
+    # print(r_error)
+    # print(t_error)
+
+    # plot line histogram diagram
+    # y, binEdges = np.histogram(r_error, bins=1)
+    # bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
+    # plt.plot(bincenters, y, '-')
+    # plt.show()
+
+    plt.figure(figsize=[12, 7])
+    plt.hist([bag_2000_error, bag_1000_error,bag_500_error,bag_200_error], label=['size=2000','size=1000','size=500','size=200'], alpha=0.7)
+    plt.title("Histogram: 200 sample")
+    plt.xlabel("error")
+    plt.ylabel("sample count")
+    plt.legend(loc='upper right')
+    plt.show()
+
+
+def test_bag_TFIDF(size= 10):
+    rm = load_pickle('rm.pkl')
+    bag_200 = load_pickle('bag_of_words_200.pkl')
+    TFIDF_200 = load_pickle('TFIDF_200.pkl')
+    maps = load_pickle('maps.pkl')
+    print("Start Testing. Whole testing round:", size)
+
+    # bag , TFIDF
+    bag_records = []
+    TFIDF_records = []
+    bag_error = []
+    TFIDF_error = []
+
+    # for each epoch
+    for i in range(0, size):
+        # get a random user index
+        uid = random.randint(0, len(rm[0]))
+
+        # get a random real rating index and hide this to predict.
+        rid = random.sample([j for j, e in enumerate(np.array(rm).T[uid]) if e != 0], 1)[0]
+        real_score = rm[rid][uid]
+        # print(real_score)
+        bag_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=bag_200, maps=maps)
+        TFIDF_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=TFIDF_200, maps=maps)
+
+        # records parameters:[user_index , restaurant_index , real_rank, predict_rank]
+        one = [uid, rid, real_score, bag_score]
+        two = [uid, rid, real_score, TFIDF_score]
+
+        print("Round:", i)
+
+        bag_records.append(one)
+        TFIDF_records.append(two)
+        bag_error.append(abs(real_score - bag_score))
+        TFIDF_error.append(abs(real_score - TFIDF_score))
+
+    print("After test the", size, "samples, mean absolute error (MAE) achieved:")
+    print("bag-of-words(size=200):", MAE(bag_records))
+    print("TFIDF(size=200):", MAE(TFIDF_records))
+    print('Error distribution for each approach:')
+    # print(r_error)
+    # print(t_error)
+
+    # plot line histogram diagram
+    # y, binEdges = np.histogram(r_error, bins=1)
+    # bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
+    # plt.plot(bincenters, y, '-')
+    # plt.show()
+
+    plt.figure(figsize=[12, 7])
+    plt.hist([bag_error, TFIDF_error], label=['bag-of-words(size=200)', 'TFIDF(size=200)'], alpha=0.7)
+    plt.title("Histogram: 200 sample")
+    plt.xlabel("error")
+    plt.ylabel("sample count")
+    plt.legend(loc='upper right')
+    plt.show()
+
+
+def test_TFIDF(size=10):
+    print("Start Testing. Whole testing round:", size)
+
+    rm = load_pickle('rm.pkl')
+    bag_2000 = load_pickle('TFIDF_2000.pkl')
+    bag_1000 = load_pickle('TFIDF_1000.pkl')
+    bag_500 = load_pickle('TFIDF_500.pkl')
+    bag_200 = load_pickle('TFIDF_200.pkl')
+    maps = load_pickle('maps.pkl')
+
+    # bag_of_words
+    bag_2000_records = []
+    bag_1000_records = []
+    bag_500_records = []
+    bag_200_records = []
+    bag_2000_error = []
+    bag_1000_error = []
+    bag_500_error = []
+    bag_200_error = []
+
+    # for each epoch
+    for i in range(0, size):
+        # get a random user index
+        uid = random.randint(0, len(rm[0]))
+
+        # get a random real rating index and hide this to predict.
+        rid = random.sample([j for j, e in enumerate(np.array(rm).T[uid]) if e != 0], 1)[0]
+        real_score = rm[rid][uid]
+        # print(real_score)
+        # r_score = rm_predict(rid=rid, uid=uid, rm=rm)
+
+        bag_2000_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=bag_2000, maps=maps)
+        bag_1000_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=bag_1000, maps=maps)
+        bag_500_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=bag_500, maps=maps)
+        bag_200_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=bag_200, maps=maps)
+
+        # records parameters:[user_index , restaurant_index , real_rank, predict_rank]
+        one = [uid, rid, real_score, bag_2000_score]
+        two = [uid, rid, real_score, bag_1000_score]
+        three = [uid, rid, real_score, bag_500_score]
+        four = [uid, rid, real_score, bag_200_score]
+
+        print("Round:", i)
+
+        bag_2000_records.append(one)
+        bag_1000_records.append(two)
+        bag_500_records.append(three)
+        bag_200_records.append(four)
+        bag_2000_error.append(abs(real_score - bag_2000_score))
+        bag_1000_error.append(abs(real_score - bag_1000_score))
+        bag_500_error.append(abs(real_score - bag_500_score))
+        bag_200_error.append(abs(real_score - bag_200_score))
+
+    print("After test the", size, "samples, mean absolute error (MAE) achieved:")
+    print("TFIDF_2000:", MAE(bag_2000_records))
+    print("TFIDF_1000:", MAE(bag_1000_records))
+    print("TFIDF_500:", MAE(bag_500_records))
+    print("TFIDF_200:", MAE(bag_200_records))
+    print('Error distribution for each approach:')
+    # print(r_error)
+    # print(t_error)
+
+    # plot line histogram diagram
+    # y, binEdges = np.histogram(r_error, bins=1)
+    # bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
+    # plt.plot(bincenters, y, '-')
+    # plt.show()
+
+    plt.figure(figsize=[12, 7])
+    plt.hist([bag_2000_error, bag_1000_error,bag_500_error,bag_200_error], label=['size=2000','size=1000','size=500','size=200'], alpha=0.7)
+    plt.title("Histogram for size of TFIDF: 200 sample")
+    plt.xlabel("error")
+    plt.ylabel("sample count")
+    plt.legend(loc='upper right')
+    plt.show()
+
+
+# records parameters:[user_index , restaurant_index , real_rank, predict_rank]
+def RMSE(records):
+    return math.sqrt(sum([(rui - pui) * (rui - pui) for u, i, rui, pui in records]) / float(len(records)))
+
+
+def MAE(records):
+    return (sum([abs(rui - pui) for u, i, rui, pui in records])) / float(len(records))
 
 
 if __name__ == '__main__':

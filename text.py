@@ -6,7 +6,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import wordnet
 from nltk.stem import PorterStemmer
 from collections import Counter
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
@@ -23,7 +23,7 @@ def get_data():
         busi_list.append(var.business_id)
     return text_list, user_list, busi_list
 
-
+                
 def get_text():
     text_list = []
     # user_list = []
@@ -133,8 +133,30 @@ def get_words_vec():
     # text_list = ['I like you free good',
     #              'I hate you bade good',
     #              'how are you, good ,street bade ']
-    vectorizer = CountVectorizer(max_features=2000, lowercase=True, stop_words='english')
+    vectorizer = CountVectorizer(max_features=200, lowercase=True, stop_words='english')
     X = vectorizer.fit_transform(text_list)
+
+    # print(vectorizer.get_feature_names())
+    # print(X.toarray().shape)
+
+    # print(vectorizer.vocabulary_)
+    output = open('bag_of_words_200.pkl', 'wb')
+    pickle.dump(X.toarray(), output)
+    output.close()
+
+
+def get_words_TFIDF():
+    text_list = get_text()
+    # text_list = ['I like you free good',
+    #              'I hate you bade good',
+    #              'how are you, good ,street bade ']
+
+    vectorizer= TfidfVectorizer(stop_words='english', lowercase=True, max_features=200)
+
+    X = vectorizer.fit_transform(text_list)
+    output = open('TFIDF_200.pkl', 'wb')
+    pickle.dump(X.toarray(), output)
+    output.close()
 
     # print(vectorizer.get_feature_names())
     # print(X.toarray().shape)
@@ -175,9 +197,11 @@ def test():
 
 
 if __name__ == '__main__':
-    a = load_pickle('maps.pkl')
-    print(a)
-    print('shape',a.shape)
+    # a = load_pickle('maps.pkl')
+    # print(a)
+    # print('shape',a.shape)
+    # get_words_TFIDF()
+
     # start()
     # get_words_vec()
     # sr = stopwords.words('english')
