@@ -11,7 +11,11 @@ First, use git to clone
 ```
 git clone https://github.com/zeyakong/Recommendation_Django.git
 ```
-or download the whole project . 
+or download the whole project zip file.  
+
+### Required Environment
+*Python 3.6 or above
+*Django 2.1 or above
 
 
 
