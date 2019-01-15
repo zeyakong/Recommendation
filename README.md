@@ -48,8 +48,8 @@ This app uses collaborative filtering algorithm based on ratings and text review
 * word-of-bags
 * TF-IDF
 * Word2Vec
-** Google-News pretrained network
-** gensim
+##### Google-News pre-trained neural network
+##### gensim pre-trained neural network
 * sentence2Vec / Doc2Vec
 
 ## Conclusion
