@@ -14,8 +14,9 @@ git clone https://github.com/zeyakong/Recommendation_Django.git
 or download the whole project zip file.  
 
 ### Required Environment
-* Python 3.6 or above
-* Django 2.1 or above
+In order to run this app, your machine must have:  
+* Python 3.6 or above [website](https://www.python.org/)
+* Django 2.1 or above ['website'](https://www.djangoproject.com/)
 
 
 
