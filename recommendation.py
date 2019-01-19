@@ -4,6 +4,7 @@ import math
 import random
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+import time
 
 
 def load_pickle(pickle_name):
@@ -60,11 +61,11 @@ def start():
     test_bag_TFIDF(size=200)
 
 
-def rm_predict(rid, uid, rm):
+def rm_predict(rid, uid, rm, alg='cosine'):
     # find similar user list
-    sim_user = rm_find_sim_row_list(rm=rm.T, row=uid, column=rid)
+    sim_user = rm_find_sim_row_list(rm=rm.T, row=uid, column=rid, alg=alg)
     # find similar restaurant list
-    sim_rest = rm_find_sim_row_list(rm=rm, row=rid, column=uid)
+    sim_rest = rm_find_sim_row_list(rm=rm, row=rid, column=uid, alg=alg)
     # chose top 30 similar users and restaurants' score and get the average.
     score = get_score(rest_id=rid, user_id=uid, sim_rest_index_list=sim_rest, sim_user_index_list=sim_user, rm=rm)
     return score
@@ -102,12 +103,17 @@ def get_score(rest_id, user_id, sim_user_index_list, sim_rest_index_list, rm):
 
 # the following method will find the similar row for the given matrix. it will return the sorted
 # result. From Euclidean distance. the first one is the most similar one.(smallest value)
-def rm_find_sim_row_list(rm, row, column):
+def rm_find_sim_row_list(rm, row, column, alg='cosine'):
     result = dict()
     for i in range(len(rm)):
         if rm[i][column] > 0 and i != row:
             v1, v2 = find_2vector_nonzero_sub(v1=rm[i], v2=rm[row], ignore_index=column)
-            sim_score = euclidean_sim(vector1=v1, vector2=v2)
+            if alg == 'euclidean':
+                sim_score = euclidean_sim(vector1=v1, vector2=v2)
+            elif alg == 'cosine':
+                sim_score = cosine_sim(vector1=v1, vector2=v2)
+            else:
+                sim_score = pearson_sim(vector1=v1, vector2=v2)
             result[i] = sim_score
     temp = sorted(result.items(), key=lambda kv: kv[1])
     # print(temp)
@@ -160,42 +166,46 @@ def wm_predict(rid, uid, maps, wm, rm):
 
 def test_acc(size=10):
     rm = load_pickle('rm.pkl')
-    wm = load_pickle('wm.pkl')
+    wm1 = load_pickle('bag_of_words_2000.pkl')
+    wm2 = load_pickle('TFIDF_2000.pkl')
     maps = load_pickle('maps.pkl')
+    test_set = load_pickle('test_set.pkl')
     print("Start Testing. Whole testing round:", size)
 
     # r: rating-based , t: text-based
     r_records = []
-    t_records = []
+    t1_records = []
+    t2_records = []
     r_error = []
-    t_error = []
+    t1_error = []
+    t2_error = []
 
     # for each epoch
-    for i in range(0, size):
-        # get a random user index
-        uid = random.randint(0, len(rm[0]))
-
-        # get a random real rating index and hide this to predict.
-        rid = random.sample([j for j, e in enumerate(np.array(rm).T[uid]) if e != 0], 1)[0]
+    for one in test_set:
+        rid = one[0]
+        uid = one[1]
         real_score = rm[rid][uid]
         # print(real_score)
-        r_score = rm_predict(rid=rid, uid=uid, rm=rm)
-        t_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=wm, maps=maps)
+        r_score = rm_predict(rid=rid, uid=uid, rm=rm, alg='cosine')
+        t1_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=wm1, maps=maps)
+        t2_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=wm2, maps=maps)
 
         # records parameters:[user_index , restaurant_index , real_rank, predict_rank]
         one = [uid, rid, real_score, r_score]
-        two = [uid, rid, real_score, t_score]
-
-        print("Round:", i)
+        two = [uid, rid, real_score, t1_score]
+        three = [uid, rid, real_score, t2_score]
 
         r_records.append(one)
-        t_records.append(two)
+        t1_records.append(two)
+        t2_records.append(three)
         r_error.append(abs(real_score - r_score))
-        t_error.append(abs(real_score - t_score))
+        t1_error.append(abs(real_score - t1_score))
+        t2_error.append(abs(real_score - t2_score))
 
     print("After test the", size, "samples, mean absolute error (MAE) achieved:")
-    print("rating-based:", MAE(r_records))
-    print("text-based:", MAE(t_records))
+    print("rating-based(Cosine):", MAE(r_records))
+    print("text-based(words-of-bags,Cosine):", MAE(t1_records))
+    print("text-based(TFIDF,Cosine):", MAE(t2_records))
     print('Error distribution for each approach:')
     # print(r_error)
     # print(t_error)
@@ -207,8 +217,8 @@ def test_acc(size=10):
     # plt.show()
 
     plt.figure(figsize=[12, 7])
-    plt.hist([r_error, t_error], label=['rating-based', 'text-based'], alpha = 0.7)
-    plt.title("Histogram: 200 sample")
+    plt.hist([r_error, t1_error,t2_error], label=['Rating-based', 'Text-Word-of-bags_2000', 'Text-TFIDF_2000'], alpha=0.7)
+    plt.title("Histogram: 200 sample for different approaches(by using Cosine Similarity)")
     plt.xlabel("error")
     plt.ylabel("sample count")
     plt.legend(loc='upper right')
@@ -224,6 +234,7 @@ def test_bag_of_words(size=10):
     bag_500 = load_pickle('bag_of_words_500.pkl')
     bag_200 = load_pickle('bag_of_words_200.pkl')
     maps = load_pickle('maps.pkl')
+    test_set = load_pickle('test_set.pkl')
 
     # bag_of_words
     bag_2000_records = []
@@ -236,12 +247,9 @@ def test_bag_of_words(size=10):
     bag_200_error = []
 
     # for each epoch
-    for i in range(0, size):
-        # get a random user index
-        uid = random.randint(0, len(rm[0]))
-
-        # get a random real rating index and hide this to predict.
-        rid = random.sample([j for j, e in enumerate(np.array(rm).T[uid]) if e != 0], 1)[0]
+    for one in test_set:
+        rid = one[0]
+        uid = one[1]
         real_score = rm[rid][uid]
         # print(real_score)
         # r_score = rm_predict(rid=rid, uid=uid, rm=rm)
@@ -256,8 +264,6 @@ def test_bag_of_words(size=10):
         two = [uid, rid, real_score, bag_1000_score]
         three = [uid, rid, real_score, bag_500_score]
         four = [uid, rid, real_score, bag_200_score]
-
-        print("Round:", i)
 
         bag_2000_records.append(one)
         bag_1000_records.append(two)
@@ -284,20 +290,22 @@ def test_bag_of_words(size=10):
     # plt.show()
 
     plt.figure(figsize=[12, 7])
-    plt.hist([bag_2000_error, bag_1000_error,bag_500_error,bag_200_error], label=['size=2000','size=1000','size=500','size=200'], alpha=0.7)
-    plt.title("Histogram: 200 sample")
+    plt.hist([bag_2000_error, bag_1000_error, bag_500_error, bag_200_error],
+             label=['size=2000', 'size=1000', 'size=500', 'size=200'], alpha=0.7)
+    plt.title("Histogram for bag of words: 200 sample(Pearson_similarity)")
     plt.xlabel("error")
     plt.ylabel("sample count")
     plt.legend(loc='upper right')
     plt.show()
 
 
-def test_bag_TFIDF(size= 10):
+def test_bag_TFIDF(size=10):
     rm = load_pickle('rm.pkl')
     bag_200 = load_pickle('bag_of_words_200.pkl')
     TFIDF_200 = load_pickle('TFIDF_200.pkl')
     maps = load_pickle('maps.pkl')
     print("Start Testing. Whole testing round:", size)
+    test_set = load_pickle('test_set.pkl')
 
     # bag , TFIDF
     bag_records = []
@@ -306,12 +314,9 @@ def test_bag_TFIDF(size= 10):
     TFIDF_error = []
 
     # for each epoch
-    for i in range(0, size):
-        # get a random user index
-        uid = random.randint(0, len(rm[0]))
-
-        # get a random real rating index and hide this to predict.
-        rid = random.sample([j for j, e in enumerate(np.array(rm).T[uid]) if e != 0], 1)[0]
+    for one in test_set:
+        rid = one[0]
+        uid = one[1]
         real_score = rm[rid][uid]
         # print(real_score)
         bag_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=bag_200, maps=maps)
@@ -320,8 +325,6 @@ def test_bag_TFIDF(size= 10):
         # records parameters:[user_index , restaurant_index , real_rank, predict_rank]
         one = [uid, rid, real_score, bag_score]
         two = [uid, rid, real_score, TFIDF_score]
-
-        print("Round:", i)
 
         bag_records.append(one)
         TFIDF_records.append(two)
@@ -359,6 +362,7 @@ def test_TFIDF(size=10):
     bag_500 = load_pickle('TFIDF_500.pkl')
     bag_200 = load_pickle('TFIDF_200.pkl')
     maps = load_pickle('maps.pkl')
+    test_set = load_pickle('test_set.pkl')
 
     # bag_of_words
     bag_2000_records = []
@@ -371,12 +375,9 @@ def test_TFIDF(size=10):
     bag_200_error = []
 
     # for each epoch
-    for i in range(0, size):
-        # get a random user index
-        uid = random.randint(0, len(rm[0]))
-
-        # get a random real rating index and hide this to predict.
-        rid = random.sample([j for j, e in enumerate(np.array(rm).T[uid]) if e != 0], 1)[0]
+    for one in test_set:
+        rid = one[0]
+        uid = one[1]
         real_score = rm[rid][uid]
         # print(real_score)
         # r_score = rm_predict(rid=rid, uid=uid, rm=rm)
@@ -391,8 +392,6 @@ def test_TFIDF(size=10):
         two = [uid, rid, real_score, bag_1000_score]
         three = [uid, rid, real_score, bag_500_score]
         four = [uid, rid, real_score, bag_200_score]
-
-        print("Round:", i)
 
         bag_2000_records.append(one)
         bag_1000_records.append(two)
@@ -419,8 +418,9 @@ def test_TFIDF(size=10):
     # plt.show()
 
     plt.figure(figsize=[12, 7])
-    plt.hist([bag_2000_error, bag_1000_error,bag_500_error,bag_200_error], label=['size=2000','size=1000','size=500','size=200'], alpha=0.7)
-    plt.title("Histogram for size of TFIDF: 200 sample")
+    plt.hist([bag_2000_error, bag_1000_error, bag_500_error, bag_200_error],
+             label=['size=2000', 'size=1000', 'size=500', 'size=200'], alpha=0.7)
+    plt.title("Histogram for size of TFIDF: 200 sample(Pearson_similarity)")
     plt.xlabel("error")
     plt.ylabel("sample count")
     plt.legend(loc='upper right')
@@ -436,6 +436,79 @@ def MAE(records):
     return (sum([abs(rui - pui) for u, i, rui, pui in records])) / float(len(records))
 
 
+# this function will receive the test sample's size as the parameter and randomly chose
+# those test cases and store into desk as python pickle.The default size is 20
+def create_test_sample(rm, size=20):
+    temp = list()
+    result = list()
+    for i in range(size):
+        uid = random.randint(0, len(rm[0]))
+
+        # get a random real rating index and hide this to predict.
+        rid = random.sample([j for j, e in enumerate(np.array(rm).T[uid]) if e != 0], 1)[0]
+        real_score = rm[rid][uid]
+
+        temp = [rid, uid]
+        result.append(temp)
+    # print(result)
+    print('Success store the test pickle!')
+    output = open('test_set.pkl', 'wb')
+    pickle.dump(result, output)
+    output.close()
+
+
+def test_by_using_test_set():
+    rm = load_pickle('rm.pkl')
+    test_set = load_pickle('test_set.pkl')
+    maps = load_pickle('maps.pkl')
+    rm = load_pickle('bag_of_words_200.pkl')
+
+    # r: rating-based , t: text-based
+    r_records = []
+    r_error = []
+
+    total_time = 0
+    for one in test_set:
+        rid = one[0]
+        uid = one[1]
+        real_score = rm[rid][uid]
+        # print('[',rid,',',uid,'] = ',real_score)
+        start_time = time.time()
+        r_score = rm_predict(rid=rid, uid=uid, rm=rm)
+
+        # t_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=bag_200, maps=maps)
+        end_time = time.time()
+        total_time = total_time + end_time - start_time
+
+        # t_score = wm_predict(rid=rid, uid=uid, rm=rm, wm=wm, maps=maps)
+
+        # records parameters:[user_index , restaurant_index , real_rank, predict_rank]
+        one = [uid, rid, real_score, r_score]
+        # two = [uid, rid, real_score, t_score]
+
+        r_records.append(one)
+        # t_records.append(two)
+        r_error.append(abs(real_score - r_score))
+        # t_error.append(abs(real_score - t_score))
+    print("After test the", 200, "samples, mean absolute error (MAE) achieved:")
+    print("rating-based:", MAE(r_records))
+    # print("text-based:", MAE(t_records))
+    print('Total time:', total_time, '|average time', total_time / 200)
+    plt.figure(figsize=[12, 7])
+    plt.hist(r_error)
+    plt.title("Histogram for size of rating: 200 sample")
+    plt.xlabel("error")
+    plt.ylabel("sample count")
+    plt.show()
+
+
 if __name__ == '__main__':
-    start()
+    # rm = load_pickle('rm.pkl')
+    # test_set = load_pickle('test_set.pkl')
+    # test_by_using_test_set()
+    # test_TFIDF()
+    # test_bag_of_words()
+    test_acc(size=200)
+    # start()
+    # test_acc()
     exit()

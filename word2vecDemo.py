@@ -4,8 +4,8 @@ import time
 
 
 def start():
-    run_google_word2vec()
-
+    # run_google_word2vec()
+    run_glove_word2vec()
 
 def run_google_word2vec():
     start = time.time()
@@ -18,16 +18,21 @@ def run_google_word2vec():
 
 
 def run_glove_word2vec():
-    # glove_input_file = 'glove.6B.100d.txt'
-    # word2vec_output_file = 'glove.6B.100d.txt.word2vec'
+    start = time.time()
+    # glove_input_file = 'glove.6B.50d.txt'
+    # word2vec_output_file = 'glove.6B.50d.txt.word2vec'
     # glove2word2vec(glove_input_file, word2vec_output_file)
 
     # load the Stanford GloVe model
-    filename = 'glove.6B.100d.txt.word2vec'
+    filename = 'glove.6B.50d.txt.word2vec'
     model = KeyedVectors.load_word2vec_format(filename, binary=False)
+    # model.wv.save_word2vec_format('model.bin')
+
     # calculate: (king - man) + woman = ?
     # result = model.most_similar(positive=['woman', 'king'], negative=['man'], topn=1)
     print(model['king'])
+    end = time.time()
+    print('time:', end - start)
 
 
 if __name__ == '__main__':
