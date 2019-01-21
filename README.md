@@ -4,7 +4,7 @@ Python recommendation Engine. The app uses Python Django framework to implement.
 ## About This Project
 This system chose 1619 restaurant samples which located in Wisconsin from the yelp data-set, which includes 26552 customers and 82510 reviews related to those restaurants. All of those are training data. 
 
-The aim of this project is to develop a web application to do recommendation according to the those review and rating. This system will combine machine learning rating analysis and nature language processing to do the prediction.
+The aim of this project is to develop a web application to do recommendation according to those review and rating. This system will combine machine learning rating-based algorithm such as collaborative filtering and nature language processing such as word2vec to do the prediction.
 
 ## Get Started
 Use git to clone 
