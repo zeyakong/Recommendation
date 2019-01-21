@@ -22,7 +22,7 @@ and load the file into your IDE.
 
 ### Download the Dataset from Yelp
 This app uses yelp acdamic data set. So you must download those date set at yelp's [official website](https://www.yelp.com/dataset)    
-When you finiseh download, you should unpack those file and copy business.json, reviews.json and user.json into the project root folder $XXX/DjangoTest/  
+When you finish downloading, you should unpack those file and copy business.json, reviews.json and user.json into the project root folder $XXX/DjangoTest/  
 ### Load Data
 This project uses Django default SQLite DB. In order to run this app with correct data. You should manually load the json data from what you downloaded before.  
 Because those data cannot be loaded directly into Django SQLite DB, you have to execute the load python file when you are in the Django environment.
