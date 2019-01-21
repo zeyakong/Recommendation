@@ -37,7 +37,7 @@ def get_text():
 
 
 def load_pickle(file):
-    print("Load the rating matrix...")
+    print("Load the",file,"matrix...")
     pkl_file = open(file, 'rb')
     data = pickle.load(pkl_file)
     # pprint.pprint(data)
@@ -145,6 +145,11 @@ def get_words_vec():
     output.close()
 
 
+def get_doc_vec_by_word2vec():
+    text_list = get_text()
+
+
+
 def get_words_TFIDF():
     text_list = get_text()
     # text_list = ['I like you free good',
@@ -185,6 +190,22 @@ def print_top_n_words():
     plt.show()
 
 
+def store_top_n_words(filename, size=2000):
+    text_list = get_text()
+    vectorizer = CountVectorizer(max_features=2000, lowercase=True, stop_words='english')
+    X = vectorizer.fit_transform(text_list)
+    sum_words = X.sum(axis=0)
+    words_freq = [(word, sum_words[0, idx]) for word, idx in vectorizer.vocabulary_.items()]
+    words_freq = sorted(words_freq, key=lambda x: x[1], reverse=True)
+    # print(words_freq)
+    x = []
+    for one in words_freq[0:2000]:
+        x.append(one[0])
+    output = open(filename, 'wb')
+    pickle.dump(x, output)
+    output.close()
+
+
 def test():
     # maps[r_index][u_index] = text_index
     maps = load_pickle('maps.pkl')
@@ -201,6 +222,8 @@ if __name__ == '__main__':
     # print(a)
     # print('shape',a.shape)
     # get_words_TFIDF()
+    # store_top_n_words('top_2000_words.pkl')
+    # print(get_keywords('i DSADA NI MA hi Everty'))
 
     # start()
     # get_words_vec()

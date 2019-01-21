@@ -5,6 +5,9 @@ import random
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 import time
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import PorterStemmer
 
 
 def load_pickle(pickle_name):
