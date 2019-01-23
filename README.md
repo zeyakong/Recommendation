@@ -51,6 +51,7 @@ This app uses collaborative filtering algorithm based on ratings and text review
 ##### Google-News pre-trained neural network
 ##### gensim pre-trained neural network
 * sentence2Vec / Doc2Vec
+* [BERT](https://github.com/google-research/bert)
 
 # Conclusion
 the mean absolute error of text-based recommendation is better than the rating-based. The reason is the data matrix we generated is a sparse matrix, which means some restaurants don’t have too many reviews. We cannot give a precise recommendation without enough rating information. But because each review has some texts to read, the system can try to understand the text review and use this information to give more precise result. 
