@@ -7,7 +7,7 @@ This system chose 1619 restaurant samples which located in Wisconsin from the ye
 The aim of this project is to develop a web application to do recommendation according to those review and rating. This system will combine machine learning rating-based algorithm such as collaborative filtering and nature language processing such as word2vec to do the prediction.
 
 ## Get Started
-Use git to clone 
+Use Git to clone 
 ```
 git clone https://github.com/zeyakong/Recommendation_Django.git
 ```
