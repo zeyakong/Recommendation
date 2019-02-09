@@ -15,7 +15,7 @@
 <div id="content_1">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="#">Restaurant Recommendation</a>
+            <a class="navbar-brand" href="#">Restaurant Recommendation Engine</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -31,8 +31,9 @@
                                class="btn btn-outline-warning">Logout</a>
                         </div>
                     {% else %}
-                        <a class="btn btn-outline-secondary" href="{% url 'login' %}?next={{ request.path }}">Login</a>
-                        <a class="btn btn-success ml-3" href="{% url 'users:register' %}?next={{ request.path }}">Sign
+                        <a class="btn btn-outline-secondary btn-sm" href="{% url 'login' %}?next={{ request.path }}">Login</a>
+                        <a class="btn btn-success ml-3 btn-sm"
+                           href="{% url 'users:register' %}?next={{ request.path }}">Sign
                             Up</a>
                     {% endif %}
                 </div>
@@ -65,17 +66,17 @@
     <div class="container">
         <p>
         <h1 class="text-center">Get Started</h1>
-        <h5 class="mt-4">1. Sign up and login to the system.</h5>
+        <h5 class="mt-4">1. Sign up and login to the system</h5>
         <br>
-        <h5>2. Search the restaurant.</h5>
+        <h5>2. Search the restaurant</h5>
         <br>
-        <h5>3. Give some reviews（text and stars） to those restaurants you searched.</h5>
+        <h5>3. Give some reviews（text and stars） to those restaurants you searched</h5>
         <br>
-        <h5>4. Generate the recommendation report.</h5>
+        <h5>4. Generate the recommendation report</h5>
         <br>
         *The data-set is from the
         <button class="btn btn-sm btn-outline-info">www.yelp.com</button>
-        .
+
         </p>
     </div>
 </div>
@@ -83,7 +84,7 @@
 <div id="content_3">
     <div class="container">
         <p>
-        <h1 class="text-center mb-4">About</h1>
+        <h4>About This Project</h4>
         This system chose 1619 restaurant samples which located in Wisconsin from the yelp data-set, which includes
         26552 customers and 82510
         reviews related to those restaurants.
@@ -91,9 +92,97 @@
         <br>
         <br>
         The aim of this project is to develop a web application to do recommendation
-        according to the those review and rating. This system will combine machine
+        according to the those text reviews and ratings. This system will combine machine
         learning rating analysis and nature language processing to do the prediction.
+        <br>
+        <br>
+        <h4>Algorithms</h4>
+        This app uses collaborative filtering algorithm based on ratings and text reviews, which contains
+        <br>
+        <button class="btn btn-sm btn-info" disabled></button>
+        <span>Finished</span>
+        <button class="btn btn-sm btn-warning" disabled></button>
+        <span>In progress</span>
+
+        <h6 class="mt-3">Similarity Calculation</h6>
+        <ul>
+            <li>
+                <button class="btn btn-sm btn-info">Euclidean Distance</button>
+            </li>
+            <li class="mt-2">
+                <button class="btn btn-sm btn-info">Cosine Similarity</button>
+            </li>
+            <li class="mt-2">
+                <button class="btn btn-sm btn-info">Pearson Coefficient</button>
+            </li>
+        </ul>
+
+        <h6 class="mt-4">Natural Language Processing (NLP)</h6>
+
+        <ul>
+            <li>
+                <button class="btn btn-sm btn-info">Words-of-bags</button>
+            </li>
+            <li class="mt-2">
+                <button class="btn btn-sm btn-info">TF-IDF</button>
+            </li>
+            <li class="mt-2">
+                <button class="btn btn-sm btn-info">Word2Vec</button>
+                <ul>
+                    <li>
+                        Google-News pre-trained neural network
+                    </li>
+                    <li>
+                        Glove.6b
+                    </li>
+                </ul>
+            </li>
+            <li class="mt-2">
+                <button class="btn btn-sm btn-warning">Doc2Vec</button>
+            </li>
+            <li class="mt-2">
+                <button class="btn btn-sm btn-warning">Google BERT</button>
+            </li>
+        </ul>
+        <h4 class="mt-4">Conclusion</h4>
+        the mean absolute error of text-based recommendation is better than the rating-based. The reason is the data
+        matrix we generated is a sparse matrix, which means some restaurants don’t have too many reviews. We cannot give
+        a precise recommendation without enough rating information. But because each review has some texts to read, the
+        system can try to understand the text review and use this information to give more precise result.
+        <h4 class="mt-4">Future Work</h4>
+        <ul>
+            <li>Try to process the whole yelp data</li>
+            <li>Sparse matrix problem</li>
+            <li>Dynamic model (auto-build the matrix)</li>
+        </ul>
+        <button class="btn btn-primary">Contribute this Project</button>
+
+        <h4 class="mt-4">Testing Results</h4>
+        <img src="../static/result_table.png">
+        <h4 class="mt-4">References</h4>
+        <small>
+            [1] Richard Socher, CS 224D course note: Deep Learning for NLP1
+            https://cs224d.stanford.edu/lecture_notes/notes1.pdf
+            <br>
+            [2] Synced, Best NLP Model Ever? Google BERT Sets New Standards in 11 Language Tasks
+            https://medium.com/syncedreview/best-nlp-model-ever-google-bert-sets-new-standards-in-11-language-tasks-4a2a189bc155
+            <br>
+            [3] Structured vs. Unstructured data, https://brightplanet.com/2012/06/structured-vs-unstructured-data/
+            <br>
+            [4] A Beginner's Quide to Word2Vec and Neural Word Embeddings https://skymind.ai/wiki/word2vec
+            <br>
+            [5] Mikolov, Tomas, et al. "Efficient estimation of word representations in vector space." arXiv preprint
+            arXiv:1301.3781 (2013). https://arxiv.org/abs/1301.3781
+            <br>
+            [6] Devlin, Jacob, et al. "Bert: Pre-training of deep bidirectional transformers for language
+            understanding."
+            arXiv preprint arXiv:1810.04805 (2018). https://arxiv.org/abs/1810.04805
+            <br>
+            [7] Vaswani, Ashish, et al. "Attention is all you need." Advances in Neural Information Processing Systems.
+            2017.
+        </small>
         </p>
+
     </div>
 </div>
 

@@ -147,6 +147,15 @@ def get_words_vec():
 
 def get_doc_vec_by_word2vec():
     text_list = get_text()
+    result = list()
+    words_embedding = load_pickle('words_embedding_300d.pkl')
+    for one in text_list:
+        tokens = get_keywords(one)
+        for ones in tokens:
+            if ones in words_embedding:
+                temp = words_embedding[ones]
+
+
 
 
 
