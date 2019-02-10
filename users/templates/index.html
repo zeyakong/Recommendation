@@ -4,14 +4,15 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    {% load static %}
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
           integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="{% static 'users/style.css' %}">
     <title>Restaurant Recommendation</title>
 </head>
 <body>
+<!-- nav -->
 <div id="content_1">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
@@ -27,7 +28,7 @@
                     {% if user.is_authenticated %}
                         <div class="btn-group" role="group">
                             <button class="btn btn-secondary" disabled>{{ user.username }}</button>
-                            <a href="{% url 'logout' %}?next={{ request.path }}"
+                            <a href="{% url 'logout' %}?"
                                class="btn btn-outline-warning">Logout</a>
                         </div>
                     {% else %}
@@ -42,7 +43,6 @@
 
     </nav>
     <div class="container">
-        {#        <h1 class="text-center" style="padding-top: 230px;font-weight: bold;">Restaurant Recommendation</h1>#}
         <form method='get' class="form-inline mx-auto" action="/restaurant/search/"
               style="width: 80%;margin-top: 300px;">
             {% csrf_token %}
@@ -158,7 +158,7 @@
         <button class="btn btn-primary">Contribute this Project</button>
 
         <h4 class="mt-4">Testing Results</h4>
-        <img src="../static/result_table.png">
+        <img src="{% static 'users/result_table.png' %}">
         <h4 class="mt-4">References</h4>
         <small>
             [1] Richard Socher, CS 224D course note: Deep Learning for NLP1
@@ -187,8 +187,8 @@
 </div>
 
 <div id="footer">
-    <p class="text-center">&copy; Zeya Kong
-        <br>for Capstone Project</p>
+    <div class="text-center" style="font-size:16px">&copy; Zeya Kong | Capstone Project</div>
+    <div style="font-size: 13px;" class="text-center">Contract Me: <a>Email</a>| <a>LinkedIn</a>| <a>GitHub</a></div>
 </div>
 
 <!-- Optional JavaScript -->
@@ -202,6 +202,6 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
         integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
         crossorigin="anonymous"></script>
-<script src="../static/index.js"></script>
+<script src="{% static 'users/index.js' %}"></script>
 </body>
 </html>

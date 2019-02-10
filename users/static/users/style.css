@@ -7,7 +7,7 @@ body, html {
 #content_1 {
     height: 600px;
     /*background-color: #6DDCBD;*/
-    background-image: url(../static/bg.jpg);
+    background-image: url(imagines/bg.jpg);
     background-size: 100% 130%;
 }
 
