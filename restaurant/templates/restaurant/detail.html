@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+    {% load static %}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title>Details</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="/">Restaurant Recommendation</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto"></ul>
+            <div class="form-inline">
+                {% if user.is_authenticated %}
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-secondary" disabled>{{ user.username }}</button>
+                        <a href="{% url 'logout' %}?next={{ request.path }}"
+                           class="btn btn-outline-warning">Logout</a>
+                    </div>
+                {% else %}
+                    <a class="btn btn-outline-secondary" href="{% url 'login' %}?next={{ request.path }}">Login</a>
+                    <a class="btn btn-success ml-3" href="{% url 'users:register' %}?next={{ request.path }}">Sign
+                        Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</nav>
+<div class="container">
+    <div class="card mx-auto mt-4" style="width: 50rem;">
+        <div class="card-body">
+            <p class="card-title"><h4>{{ business.name }} </h4><em
+                style="font-size: medium;color: darkred">Average Stars:{{ business.stars }}</em>
+            <small>{{ business.review_count }} reviews.</small>
+            </p>
+            <p class="mb-2 mt-2 text-muted">{{ business.address }},{{ business.city }},{{ business.state }}</p>
+            <h6 class="card-title mb-2 mt-2">
+                <mark>{{ business.categories }}</mark>
+            </h6>
+            <p>Postal_code: {{ business.postal_code }}</p>
+            <p>{{ business.latitude }} , {{ business.longitude }}</p>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-outline-info" data-toggle="modal" data-target="#exampleModal">Add a Review</button>
+        </div>
+    </div>
+    <h6 class="mt-4 mb-4">All the Reviews:</h6>
+
+
+    {% if review_list %}
+        {% for review in review_list %}
+            <div class="card mx-auto mt-4 mb-4" style="width: 100%;">
+                <div class="card-body">
+                    <h4 class="card-title float-left">
+                    </h4>
+                    <p>{{ review.text }}</p>
+                </div>
+                <div class="card-footer">
+                    <b class="float-left"><em style="color: darkred">stars:{{ review.stars }}</em></b>
+                    <div class="float-right">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-info">useful</button>
+                            <button type="button" class="btn btn-outline-secondary"
+                                    disabled>{{ review.useful }}</button>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-info">funny</button>
+                            <button type="button" class="btn btn-outline-secondary" disabled>{{ review.funny }}</button>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-info">cool</button>
+                            <button class="btn btn-outline-secondary" disabled>{{ review.cool }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        No review.
+    {% endif %}
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Review: {{ business.name }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label for="customRange3">Stars: </label><span id="stars_number"> 3</span>
+                <input type="range" class="custom-range" min="1" max="5" step="1" id="stars_range" onchange="fresh_stars_number()">
+
+                <textarea class="form-control mt-2" placeholder="Give some comments." style="height: 300px"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+<script src="{% static 'restaurant/detail.js' %}"></script>
+</body>
+</html>

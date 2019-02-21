@@ -1,0 +1,27 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">Restaurant Recommendation</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto"></ul>
+            <div class="form-inline">
+                {% if user.is_authenticated %}
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-secondary">{{ user.username }}</button>
+                        <a href="{% url 'logout' %}?next={{ request.path }}"
+                           class="btn btn-outline-warning">Logout</a>
+                    </div>
+                {% else %}
+                    <a class="btn btn-outline-secondary" href="{% url 'login' %}?next={{ request.path }}">Login</a>
+                    <a class="btn btn-success ml-3" href="{% url 'users:register' %}?next={{ request.path }}">Sign
+                        Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</nav>
