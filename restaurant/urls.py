@@ -2,8 +2,9 @@ from django.urls import path
 
 from . import views
 
-appName = 'restaurant'
+app_name = 'restaurant'
+
 urlpatterns = [
-    path('search/', views.search_result, name='search_result'),
+    path('search/', views.search_result, name='search'),
     path('<str:business_id>/', views.detail, name='detail'),
 ]

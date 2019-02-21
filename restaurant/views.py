@@ -6,11 +6,6 @@ from .models import Business, Review
 from django.db.models import Q
 
 
-# class FirstReview:
-#     def __init__(self, business_id, text):
-#         self.business_id = business_id
-#         self.text = text
-
 def search_result(request):
     keywords = request.GET.get('q')
     address = request.GET.get('n')
@@ -41,19 +36,8 @@ def search_result(request):
             first_text = list[0].text
         var.attributes = first_text[0:350]
 
-    photo_path_list = ['Wv9P3aWWLJY2MFlQj7iUVg',
-                       '4aL4G1RaC4yHedYnGHXOTQ',
-                       'lHTzTGDu3T0p83j33e0HIg',
-                       '9-S7sAZDTpBuPoPd9xAD0g',
-                       'AzhUiPgZLR3dEucr4StOsQ',
-                       'ibfxtZAMjrUnINaQi_DMtQ',
-                       'nfSk9l6MLIAgYeoXfwMamw',
-                       'lJLzbpbtdfDAsOSWqwI3cg',
-                       'oPTTofd8OhWcXI5eB86CfQ',
-                       'ktgyc_l8fp1tkn5pxC59gQ', ]
     context = {
         'business_list': business_list,
-        'photo_path_list': photo_path_list,
     }
     return render(request, 'restaurant/search_result.html', context)
 

@@ -43,9 +43,8 @@
 
     </nav>
     <div class="container">
-        <form method='get' class="form-inline mx-auto" action="/restaurant/search/"
+        <form method='get' class="form-inline mx-auto" action="{% url 'restaurant:search' %}"
               style="width: 80%;margin-top: 300px;">
-            {% csrf_token %}
             <div class="input-group" style="width: 85%;">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="basic-addon3" style="font-weight: bold">Find</span>
@@ -188,7 +187,7 @@
 
 <div id="footer">
     <div class="text-center" style="font-size:16px">&copy; Zeya Kong | Capstone Project</div>
-    <div style="font-size: 13px;" class="text-center">Contract Me: <a>Email</a>| <a>LinkedIn</a>| <a>GitHub</a></div>
+    <div style="font-size: 13px;" class="text-center">Contact Me: <a>Email</a>| <a>LinkedIn</a>| <a>GitHub</a></div>
 </div>
 
 <!-- Optional JavaScript -->

@@ -10,3 +10,12 @@ class User(AbstractUser):
 
     class Meta(AbstractUser.Meta):
         pass
+
+
+class Rating(models.Model):
+    rating_id = models.CharField(primary_key=True, max_length=200)
+    user_name = models.CharField(max_length=200)
+    business_id = models.CharField(max_length=200)
+    stars = models.CharField(max_length=20)
+    date = models.CharField(max_length=200)
+    text = models.CharField(max_length=500)
