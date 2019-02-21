@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-
+from django.core.paginator import Paginator
 # Create your views here.
 
 from .models import Business, Review
@@ -28,7 +28,11 @@ def search_result(request):
         business_list = Business.objects.filter(
             (Q(name__iregex=keywords) | Q(categories__iregex=keywords)) & (Q(address__iregex=address) | Q(
                 city__iregex=address)))
-    business_list = business_list.order_by('-stars')
+    # business_list = business_list.order_by('-review_count')
+    paginator = Paginator(business_list, 15)
+    business_list = paginator.page(1)
+
+    # this code will load the first text review to the restaurant. it might slow the system.
     for var in business_list:
         first_text = ''
         list = Review.objects.filter(business_id=var.business_id)

@@ -14,7 +14,7 @@
 <body>
 <!-- nav -->
 <div id="content_1">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="#">Restaurant Recommendation Engine</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -27,12 +27,12 @@
                 <div class="form-inline">
                     {% if user.is_authenticated %}
                         <div class="btn-group" role="group">
-                            <button class="btn btn-secondary" disabled>{{ user.username }}</button>
+                            <div class="btn" style="color: white;">{{ user.username }}</div>
                             <a href="{% url 'logout' %}?"
-                               class="btn btn-outline-warning">Logout</a>
+                               class="btn" style="color: grey;">Logout</a>
                         </div>
                     {% else %}
-                        <a class="btn btn-outline-secondary btn-sm" href="{% url 'login' %}?next={{ request.path }}">Login</a>
+                        <a class="btn btn-outline-secondary btn-sm" style="color: white;" href="{% url 'login' %}">Login</a>
                         <a class="btn btn-success ml-3 btn-sm"
                            href="{% url 'users:register' %}?next={{ request.path }}">Sign
                             Up</a>
@@ -44,7 +44,7 @@
     </nav>
     <div class="container">
         <form method='get' class="form-inline mx-auto" action="{% url 'restaurant:search' %}"
-              style="width: 80%;margin-top: 300px;">
+              style="width: 80%;margin-top: 230px;">
             <div class="input-group" style="width: 85%;">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="basic-addon3" style="font-weight: bold">Find</span>
@@ -56,7 +56,7 @@
                 </div>
                 <input class="form-control" type="text" placeholder="Address" name="n" aria-describedby="basic-addon3">
             </div>
-            <button type="submit" class="btn btn-primary ml-1" style="width: 10%">Search</button>
+            <button type="submit" class="btn btn-outline-info ml-1" style="width: 10%">Search</button>
         </form>
     </div>
 </div>
