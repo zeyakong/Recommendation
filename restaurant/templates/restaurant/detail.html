@@ -9,13 +9,21 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
           integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-
+    <!--common CSS-->
+    <link rel="stylesheet" href="{% static 'common/common.css' %}?version=123">
+    <!--rating bar-->
+    <link rel="stylesheet" href="{% static 'restaurant/fontawesome-stars-o.css' %}?version=123">
+    <!-- fontawesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+          integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
     <title>Details</title>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
     <div class="container">
-        <a class="navbar-brand" href="/">Restaurant Recommendation</a>
+        <a class="navbar-brand" href="/">Restaurants Recommendation</a>
+        <iframe src="https://ghbtns.com/github-btn.html?user=zeyakong&repo=Recommendation_Django&type=watch&count=true"
+                frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -26,96 +34,160 @@
             <div class="form-inline">
                 {% if user.is_authenticated %}
                     <div class="btn-group" role="group">
-                        <button class="btn btn-secondary" disabled>{{ user.username }}</button>
-                        <a href="{% url 'logout' %}?next={{ request.path }}"
-                           class="btn btn-outline-warning">Logout</a>
+                        <div class="btn" style="color: white;">{{ user.username }}</div>
+                        <a href="{% url 'logout' %}?"
+                           class="btn" style="color: grey;">Logout</a>
                     </div>
                 {% else %}
-                    <a class="btn btn-outline-secondary" href="{% url 'login' %}?next={{ request.path }}">Login</a>
-                    <a class="btn btn-success ml-3" href="{% url 'users:register' %}?next={{ request.path }}">Sign
+                    <a class="btn btn-outline-secondary btn-sm" style="color: white;" href="{% url 'login' %}">Login</a>
+                    <a class="btn btn-success ml-3 btn-sm"
+                       href="{% url 'users:register' %}?next={{ request.path }}">Sign
                         Up</a>
                 {% endif %}
             </div>
         </div>
     </div>
-
 </nav>
+
 <div class="container">
-    <div class="card mx-auto mt-4" style="width: 50rem;">
-        <div class="card-body">
-            <p class="card-title"><h4>{{ business.name }} </h4><em
-                style="font-size: medium;color: darkred">Average Stars:{{ business.stars }}</em>
-            <small>{{ business.review_count }} reviews.</small>
-            </p>
-            <p class="mb-2 mt-2 text-muted">{{ business.address }},{{ business.city }},{{ business.state }}</p>
-            <h6 class="card-title mb-2 mt-2">
-                <mark>{{ business.categories }}</mark>
-            </h6>
-            <p>Postal_code: {{ business.postal_code }}</p>
-            <p>{{ business.latitude }} , {{ business.longitude }}</p>
-        </div>
-        <div class="card-footer">
-            <button class="btn btn-outline-info" data-toggle="modal" data-target="#exampleModal">Add a Review</button>
-        </div>
-    </div>
-    <h6 class="mt-4 mb-4">All the Reviews:</h6>
-
-
-    {% if review_list %}
-        {% for review in review_list %}
-            <div class="card mx-auto mt-4 mb-4" style="width: 100%;">
-                <div class="card-body">
-                    <h4 class="card-title float-left">
-                    </h4>
-                    <p>{{ review.text }}</p>
-                </div>
-                <div class="card-footer">
-                    <b class="float-left"><em style="color: darkred">stars:{{ review.stars }}</em></b>
-                    <div class="float-right">
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-outline-info">useful</button>
-                            <button type="button" class="btn btn-outline-secondary"
-                                    disabled>{{ review.useful }}</button>
-                        </div>
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-outline-info">funny</button>
-                            <button type="button" class="btn btn-outline-secondary" disabled>{{ review.funny }}</button>
-                        </div>
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-outline-info">cool</button>
-                            <button class="btn btn-outline-secondary" disabled>{{ review.cool }}</button>
+    <div class="form-inline" style="margin-top: 110px">
+        <button class="btn btn-large btn-info"
+                style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);height: 100px"
+                onclick="window.history.go(-1); return false;" title="Go to Search results"><i class="fas fa-chevron-left"></i></button>
+        <div class="form-control ml-2" style="height: 100px;width: 95%">
+            <div class="row">
+                <div class="col-9">
+                    <h4>{{ business.name }}</h4>
+                    <div style="font-size: 14px; margin-top: -10px">{{ business.categories }}</div>
+                    <div class="form-inline">
+                        <div class="mr-1" style="font-size: 15px">{{ business.stars }}</div>
+                        <select class="ratingStar">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                        <div class="text-muted ml-2" style="font-size: 15px">{{ business.review_count }}
+                            customer reviews
                         </div>
                     </div>
                 </div>
-            </div>
-        {% endfor %}
-    {% else %}
-        No review.
-    {% endif %}
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Review: {{ business.name }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <label for="customRange3">Stars: </label><span id="stars_number"> 3</span>
-                <input type="range" class="custom-range" min="1" max="5" step="1" id="stars_range" onchange="fresh_stars_number()">
-
-                <textarea class="form-control mt-2" placeholder="Give some comments." style="height: 300px"></textarea>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary">Submit</button>
+                <div class="col font-weight-light" align="right"
+                     style="font-size: 17px">{{ business.address }}
+                    <br>{{ business.city }}, {{ business.state }}
+                </div>
             </div>
         </div>
     </div>
+
+
+    <div class="mt-5 mb-4">
+        <h4>Different Types of Actors</h4>
+        <div class="form-inline">
+            <img src="{% static 'restaurant/customer.jpg' %}" style="height: 50px;width: 50px">
+            <div style="font-size: 14px;" class="font-weight-bold">
+                Customer:
+            </div>
+            <div style="font-size: 14px;" class=" ml-2">
+                All customers come from yelp data-set<br>All of customers are real data<br> All customers are used to
+                generate the recommendation only
+            </div>
+            <img src="{% static 'restaurant/user.png' %}" style="height: 50px;width: 50px" class="ml-4">
+            <div style="font-size: 14px;" class="font-weight-bold">
+                User:
+            </div>
+            <div style="font-size: 14px;" class=" ml-2">
+                The user is a new 'customer' for this system<br>You can use your <b>User</b> account to login<br>
+                And give reviews.
+            </div>
+        </div>
+    </div>
+    <hr class="mb-4">
+
+    <div class="row">
+        <div class="col-8">
+            <h6 class=" mb-4">All the reviews:</h6>
+            {% if review_list %}
+                {% for review in review_list %}
+                    <div class="mt-2 row">
+                        <div class="col mt-2">
+                            <img src="{% static 'restaurant/customer.jpg' %}" style="height: 50px;width: 50px">
+                            <br>
+                            <span style="font-size: 14px;">Nick Hello</span>
+                        </div>
+                        <div class="col-10" style="font-size:16px;">
+                            <div class="form-inline mt-2">
+                                <select class="ratingStar" style="width: 100%">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                                <div class="ml-2 mb-1 text-muted" style="font-size: 15px;">
+                                    {{ review.date }}
+                                </div>
+                            </div>
+                            <div class="reviewText">
+                                {{ review.text }}
+                            </div>
+                            <br>
+                            <div class="text-muted" style="font-size: 14px;">
+                                {% if review.useful != "0" %}
+                                    {{ review.useful }} person found this review useful
+                                    <br>
+                                {% endif %}
+                                {% if review.funny != "0" %}
+                                    {{ review.funny }} person found this review funny
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                {% endfor %}
+            {% else %}
+                No available review.
+            {% endif %}
+        </div>
+        <div class="col">
+            <h6>Give your review:</h6>
+            {% if user.is_authenticated %}
+                <div class="form-inline">
+                    <img src="{% static 'restaurant/user.png' %}" style="height: 50px;width: 50px">
+                    <span style="font-size: 14px;" class="ml-2">{{ user.username }}</span>
+                </div>
+                <div class="form-inline">
+                    <select id="yourStar" style="width: 100%">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                    <div class="text-danger mb-1 ml-3 font-weight-bold" style="font-size:15px" id="ratingText"></div>
+                </div>
+                <textarea class="form-control" style="box-shadow: none; height: 300px; font-size: 17px;"
+                          placeholder="Please give a text review as well as the star rating. &#10;It will help the system to do more precise recommendation."></textarea>
+                <button class="btn btn-sm btn-success mt-2">Post Review</button>
+            {% else %}
+                <div class="form-control" style="height:120px;background-color: lightgoldenrodyellow">
+                    <div style="font-size: 16px;"> you must login first and you can give a review.</div>
+                    <div class="form-inline mt-2">
+                        <a class="btn btn-primary btn-sm mt-1" href="{% url 'login' %}">Login</a>
+                        <div class="text-muted mt-3 ml-1" style="font-size: 15px">Don't have an account? <a
+                                href="{% url 'users:register' %}?next={{ request.path }}">Sign
+                            Up</a></div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div id="footer">
+    <div class="text-center" style="font-size:16px">&copy; Zeya Kong | Capstone Project</div>
+    <div style="font-size: 13px;" class="text-center">Contact Me: <a>Email</a> | <a>LinkedIn</a> | <a>GitHub</a></div>
 </div>
 
 <!-- Optional JavaScript -->
@@ -130,5 +202,26 @@
         integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
         crossorigin="anonymous"></script>
 <script src="{% static 'restaurant/detail.js' %}"></script>
+<script src="{% static 'restaurant/jquery.barrating.min.js' %}"></script>
+<script type="text/javascript">
+    $(function () {
+        $('.ratingStar').barrating({
+            theme: 'fontawesome-stars-o',
+            readonly: true,
+            initialRating: 5
+        });
+        $('#yourStar').barrating({
+            theme: 'fontawesome-stars-o',
+            onSelect: function (data) {
+                if (data === "1") $('#ratingText').text('So bad');
+                if (data === "2") $('#ratingText').text('Not good');
+                if (data === "3") $('#ratingText').text('Just so so');
+                if (data === "4") $('#ratingText').text('Good');
+                if (data === "5") $('#ratingText').text('Very good!');
+            }
+        });
+        {#$('.reviewText').val( ).replace(/\n/g, "<br>");#}
+    });
+</script>
 </body>
 </html>

@@ -51,6 +51,8 @@ def detail(request, business_id):
     # return render(request, 'restaurant/search_result.html', context)
     business = get_object_or_404(Business, pk=business_id)
     review_list = Review.objects.filter(business_id=business_id)
+    paginator = Paginator(review_list, 15)
+    review_list = paginator.page(1)
     context = {
         'business': business,
         'review_list': review_list
