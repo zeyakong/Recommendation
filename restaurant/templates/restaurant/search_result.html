@@ -30,6 +30,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto"></ul>
             <div class="form-inline">
+            <a class="btn btn-info btn-sm mr-4" href="{% url 'restaurant:generate_rec' user.username %}">Recommendation</a>
                 {% if user.is_authenticated %}
                     <div class="btn-group" role="group">
                         <div class="btn" style="color: white;">{{ user.username }}</div>

@@ -1,3 +1,5 @@
+import uuid
+
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseRedirect
@@ -57,9 +59,11 @@ def detail(request, business_id):
     review_list = Review.objects.filter(business_id=business_id)
     paginator = Paginator(review_list, 15)
     review_list = paginator.page(1)
+    user_review = UserReview.objects.filter(business_id=business_id)
     context = {
         'business': business,
-        'review_list': review_list
+        'customer_review_list': review_list,
+        'user_review_list': user_review
     }
 
     return render(request, 'restaurant/detail.html', context)
@@ -71,7 +75,16 @@ def add_review(request, business_id):
     v2 = request.POST.get('text_review')
     v3 = request.POST.get('username')
     print('star:', v1, '|text', v2, '|username:', v3)
-    # user_review = UserReview(business_id=business_id, user_name=v3, stars=v1, date=datetime.datetime.now(), text=v2)
-    # user_review.save()
+    user_review = UserReview(rating_id=uuid.uuid4(), business_id=business_id, user_name=v3, stars=v1,
+                             date=datetime.datetime.now(), text=v2)
+    user_review.save()
 
     return HttpResponseRedirect(reverse('restaurant:detail', args=(business_id,)))
+
+
+def generate_rec(request, user_name):
+    user_review_list = UserReview.objects.filter(user_name=user_name)
+    context = {
+        'user_review_list' : user_review_list,
+    }
+    return render(request,'restaurant/generate_rec.html', context)

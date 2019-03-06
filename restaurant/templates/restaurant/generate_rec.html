@@ -1,32 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
           integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <!--common CSS-->
+    <link rel="stylesheet" href="{% static 'common/common.css' %}">
+    <!--rating bar-->
+    <link rel="stylesheet" href="{% static 'restaurant/fontawesome-stars-o.css' %}?version=2019">
     <title>recommendation</title>
 </head>
 <body>
-<div class="mt-5 text-center">
-    <h3>hello: user1234</h3>
-    <button class="btn btn-info btn-sm" disabled>Rating-based</button><br>
-    <input type="checkbox">itemCF <input type="checkbox" class="ml-2">userCF<input type="checkbox" class="ml-2">both
-    <br>
-    <button class="btn btn-warning btn-sm mt-2" disabled>text-based</button><br>
-    <input type="checkbox">bag-of-words <input type="checkbox" class="ml-2">TF-IDF<input type="checkbox" class="ml-2">word2vec<br>
-    <button class="btn btn-success btn-sm mt-2" disabled>Rating-based&text-based</button><br>
-    <input type="checkbox">both
-    <br>
-    <button class="btn btn-secondary btn-sm mt-2" disabled>recommendation type</button><br>
-    <input type="checkbox">Most Popular  <input type="checkbox" class="ml-2">Specific
-    <br>
-    <button class="btn btn-primary mt-2">Generate Recommendations</button>
-</div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">Restaurants Recommendation</a>
+        <iframe src="https://ghbtns.com/github-btn.html?user=zeyakong&repo=Recommendation_Django&type=watch&count=true"
+                frameborder="0" scrolling="0" width="170px" height="20px"></iframe>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto"></ul>
+            <div class="form-inline">
+                <a class="btn btn-info btn-sm mr-4" href="{% url 'restaurant:generate_rec' user.username %}">Recommendation</a>
+                {% if user.is_authenticated %}
+                    <div class="btn-group" role="group">
+                        <div class="btn" style="color: white;">{{ user.username }}</div>
+                        <a href="{% url 'logout' %}?"
+                           class="btn" style="color: grey;">Logout</a>
+                    </div>
+                {% else %}
+                    <a class="btn btn-outline-secondary btn-sm" style="color: white;" href="{% url 'login' %}">Login</a>
+                    <a class="btn btn-success ml-3 btn-sm"
+                       href="{% url 'users:register' %}?next={{ request.path }}">Sign
+                        Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <div style="margin-top: 100px">
+        <h2>Your Ratings & Reviews</h2>
+        {% if user_review_list %}
+            {% for user_review in user_review_list %}
+                <div class="mt-2 row">
+                    <div class="col mt-2">
+                        <img src="{% static 'restaurant/user.png' %}" style="height: 50px;width: 50px">
+                        <br>
+                        <span style="font-size: 14px; width: 100%"
+                              class="text-center mx-auto">{{ user_review.user_name }}</span>
+                    </div>
+                    <div class="col-10" style="font-size:16px;">
+                        <div class="form-inline mt-2">
+                            <select class="ratingStar" style="width: 100%">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                            <div class="ml-2 mb-1 text-muted" style="font-size: 15px;">
+                                {{ user_review.date }}
+                            </div>
+                        </div>
+                        <div class="reviewText">
+                            {{ user_review.text }}
+                        </div>
+                        <br>
+                        <div class="text-muted" style="font-size: 14px;">For
+                            restaurant: {{ user_review.business_id }}</div>
+                    </div>
+                </div>
+                <hr>
+            {% endfor %}
+        {% else %}
+            No available review.
+        {% endif %}
+    </div>
+    <div class="mt-4">
+        <h2>Generate Recommendation</h2>
+        <div id="rec_result" style="height: 300px;">
+            <div class="text-center">
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-control mt-2" style="width: 800px; height:100%;font-size: 13px" id="rec_form">
+            <div class="input-group ml-1">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" style="font-size: 13px;width: 200px">Rating-based</label>
+                </div>
+                <select class="custom-select">
+                    <option>itemCF</option>
+                    <option>userCF</option>
+                    <option>both</option>
+                </select>
+            </div>
+            <div class="input-group ml-1 mt-2">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" style="font-size: 13px;width: 200px">text-based</label>
+                </div>
+                <select class="custom-select">
+                    <option>bag-of-words</option>
+                    <option>TF-IDF</option>
+                    <option>word2vec</option>
+                </select>
+            </div>
+            <div class="input-group ml-1 mt-2">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" style="font-size: 13px;width: 200px">Rating-based&text-based</label>
+                </div>
+                <select class="custom-select">
+                    <option>both</option>
+                    <option>rating-based only</option>
+                    <option>text-based only</option>
+                </select>
+            </div>
+            <div class="input-group ml-1 mt-2">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" style="font-size: 13px;width: 200px">recommendation type</label>
+                </div>
+                <select class="custom-select">
+                    <option>Most Popular</option>
+                    <option>Specific</option>
+                </select>
+            </div>
+            <button class="btn btn-primary mt-2 form-control" style="font-size: 13px" onclick="generate()">GENERATE
+            </button>
+        </div>
+    </div>
+    <div style="height: 300px;"></div>
+</div>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -38,6 +150,21 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
         integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
         crossorigin="anonymous"></script>
-<script src="{% static 'restaurant/detail.js' %}"></script>
+<script src="{% static 'restaurant/jquery.barrating.min.js' %}"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#rec_result").hide();
+        $('.ratingStar').barrating({
+            theme: 'fontawesome-stars-o',
+            readonly: true,
+            initialRating: 5
+        });
+    });
+
+    function generate() {
+        $("#rec_form").hide();
+        $("#rec_result").show();
+    }
+</script>
 </body>
 </html>
