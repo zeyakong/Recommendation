@@ -1,14 +1,18 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
+from django.http import HttpResponse, HttpResponseRedirect
 # Create your views here.
+from django.urls import reverse
+import datetime
 
 from .models import Business, Review
+from users.models import UserReview
 from django.db.models import Q
 
 
 def search_result(request):
-    keywords = request.GET.get('q')
-    address = request.GET.get('n')
+    keywords = request.GET.get('keywords')
+    address = request.GET.get('address')
     print(keywords, address)
 
     # q = Q()
@@ -59,3 +63,15 @@ def detail(request, business_id):
     }
 
     return render(request, 'restaurant/detail.html', context)
+
+
+def add_review(request, business_id):
+    print('business id:', business_id)
+    v1 = request.POST.get('star_rating')
+    v2 = request.POST.get('text_review')
+    v3 = request.POST.get('username')
+    print('star:', v1, '|text', v2, '|username:', v3)
+    # user_review = UserReview(business_id=business_id, user_name=v3, stars=v1, date=datetime.datetime.now(), text=v2)
+    # user_review.save()
+
+    return HttpResponseRedirect(reverse('restaurant:detail', args=(business_id,)))

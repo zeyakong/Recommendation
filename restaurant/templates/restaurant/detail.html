@@ -53,7 +53,8 @@
     <div class="form-inline" style="margin-top: 110px">
         <button class="btn btn-large btn-info"
                 style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);height: 100px"
-                onclick="window.history.go(-1); return false;" title="Go to Search results"><i class="fas fa-chevron-left"></i></button>
+                onclick="window.history.go(-1); return false;" title="Go to Search results"><i
+                class="fas fa-chevron-left"></i></button>
         <div class="form-control ml-2" style="height: 100px;width: 95%">
             <div class="row">
                 <div class="col-9">
@@ -157,24 +158,30 @@
                     <img src="{% static 'restaurant/user.png' %}" style="height: 50px;width: 50px">
                     <span style="font-size: 14px;" class="ml-2">{{ user.username }}</span>
                 </div>
-                <div class="form-inline">
-                    <select id="yourStar" style="width: 100%">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                    <div class="text-danger mb-1 ml-3 font-weight-bold" style="font-size:15px" id="ratingText"></div>
-                </div>
-                <textarea class="form-control" style="box-shadow: none; height: 300px; font-size: 17px;"
-                          placeholder="Please give a text review as well as the star rating. &#10;It will help the system to do more precise recommendation."></textarea>
-                <button class="btn btn-sm btn-success mt-2">Post Review</button>
+                <form action="{% url 'restaurant:add_review' business.business_id %}" method="post">
+                {% csrf_token %}
+                    <input type="hidden" name="username" value="{{ user.username }}">
+                    <div class="form-inline">
+                        <select id="yourStar" style="width: 100%" name="star_rating">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                        <div class="text-danger mb-1 ml-3 font-weight-bold" style="font-size:15px"
+                             id="ratingText" ></div>
+                    </div>
+                    <textarea class="form-control" style="box-shadow: none; height: 300px; font-size: 17px;" name="text_review"
+                              placeholder="Please give a text review as well as the star rating. &#10;It will help the system to do more precise recommendation."></textarea>
+                    <button class="btn btn-sm btn-success mt-2" type="submit">Post Review</button>
+                </form>
+
             {% else %}
                 <div class="form-control" style="height:120px;background-color: lightgoldenrodyellow">
                     <div style="font-size: 16px;"> you must login first and you can give a review.</div>
                     <div class="form-inline mt-2">
-                        <a class="btn btn-primary btn-sm mt-1" href="{% url 'login' %}">Login</a>
+                        <a class="btn btn-primary btn-sm mt-1" href="{% url 'login' %}?next={{ request.path }}">Login</a>
                         <div class="text-muted mt-3 ml-1" style="font-size: 15px">Don't have an account? <a
                                 href="{% url 'users:register' %}?next={{ request.path }}">Sign
                             Up</a></div>
