@@ -54,10 +54,10 @@
 <div class="container">
     <div class="form-inline" style="margin-top: 110px">
         <button class="btn btn-large btn-info"
-                style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);height: 100px"
+                style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);height: 130px"
                 onclick="window.history.go(-1); return false;" title="Go to Search results"><i
                 class="fas fa-chevron-left"></i></button>
-        <div class="form-control ml-2" style="height: 100px;width: 95%">
+        <div class="form-control ml-2" style="height: 130px;width: 95%">
             <div class="row">
                 <div class="col-9">
                     <h4>{{ business.name }}</h4>
@@ -117,11 +117,11 @@
                             <img src="{% static 'restaurant/user.png' %}" style="height: 50px;width: 50px">
                             <br>
                             <span style="font-size: 14px; width: 100%"
-                                  class="text-center mx-auto">{{ user_review.user_name }}</span>
+                                  class="text-center mx-auto">{{ user_review.user.username }}</span>
                         </div>
                         <div class="col-10" style="font-size:16px;">
                             <div class="form-inline mt-2">
-                                <select class="ratingStar" style="width: 100%">
+                                <select style="width: 100%" id="{{ user_review.id }}">
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
@@ -154,7 +154,7 @@
                         </div>
                         <div class="col-10" style="font-size:16px;">
                             <div class="form-inline mt-2">
-                                <select class="ratingStar" style="width: 100%">
+                                <select style="width: 100%" id="{{ customer_review.review_id }}">
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
@@ -252,8 +252,25 @@
         $('.ratingStar').barrating({
             theme: 'fontawesome-stars-o',
             readonly: true,
-            initialRating: 5
+            initialRating: {{ business.stars }}
         });
+
+        {% for customer_review in customer_review_list %}
+            $('#{{ customer_review.review_id }}').barrating({
+                theme: 'fontawesome-stars-o',
+                readonly: true,
+                initialRating: {{ customer_review.stars }}
+            });
+        {% endfor %}
+
+        {% for user_review in user_review_list %}
+            $('#{{ user_review.id }}').barrating({
+                theme: 'fontawesome-stars-o',
+                readonly: true,
+                initialRating: {{ user_review.stars }}
+            });
+        {% endfor %}
+
         $('#yourStar').barrating({
             theme: 'fontawesome-stars-o',
             onSelect: function (data) {

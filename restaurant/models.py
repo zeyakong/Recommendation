@@ -13,7 +13,7 @@ class Business(models.Model):
     latitude = models.CharField(max_length=200)
     longitude = models.CharField(max_length=200)
     stars = models.CharField(max_length=20)
-    review_count = models.CharField(max_length=20)
+    review_count = models.IntegerField()
     is_open = models.CharField(max_length=20)
     attributes = models.CharField(max_length=500)
     categories = models.CharField(max_length=200)
@@ -22,6 +22,12 @@ class Business(models.Model):
     # class Meta:
     #     abstract = True
     #     ordering = ['-starts']
+
+
+class Customer(models.Model):
+    user_id = models.CharField(primary_key=True, max_length=200)
+    name = models.CharField(max_length=20)
+    average_stars = models.CharField(max_length=20)
 
 
 class Review(models.Model):
@@ -34,9 +40,3 @@ class Review(models.Model):
     useful = models.CharField(max_length=20)
     funny = models.CharField(max_length=20)
     cool = models.CharField(max_length=20)
-
-
-class Customer(models.Model):
-    user_id = models.CharField(primary_key=True, max_length=200)
-    name = models.CharField(max_length=20)
-    average_stars = models.CharField(max_length=20)

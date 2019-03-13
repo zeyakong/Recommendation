@@ -26,19 +26,18 @@
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto"></ul>
             <div class="form-inline">
-            <a class="btn btn-info btn-sm mr-4" href="{% url 'restaurant:generate_rec' user.username %}">Recommendation</a>
                 {% if user.is_authenticated %}
+                    <a class="btn btn-info btn-sm mr-4" href="{% url 'restaurant:generate_rec' user.username %}">Recommendation</a>
                     <div class="btn-group" role="group">
                         <div class="btn" style="color: white;">{{ user.username }}</div>
-                        <a href="{% url 'logout' %}?"
+                        <a href="{% url 'logout' %}?next={{ request.get_full_path }}"
                            class="btn" style="color: grey;">Logout</a>
                     </div>
                 {% else %}
-                    <a class="btn btn-outline-secondary btn-sm" style="color: white;" href="{% url 'login' %}">Login</a>
+                    <a class="btn btn-outline-secondary btn-sm" style="color: white;" href="{% url 'login' %}?next={{ request.get_full_path }}">Login</a>
                     <a class="btn btn-success ml-3 btn-sm"
                        href="{% url 'users:register' %}?next={{ request.path }}">Sign
                         Up</a>
@@ -51,10 +50,11 @@
 <div class="container" style="margin-top: 100px">
     <div class="row">
         <div class="col-9">
-            <div class="mt-2 mb-3 form-inline"> Filter
-                <select class="custom-select ml-2" style="width:160px;height: 40px;font-size: 15px">
-                    <option value="1">High-rated</option>
-                    <option value="2">Most popular</option>
+            <div class="mt-2 mb-3 form-inline">Filter
+                <select class="custom-select ml-2" style="width:160px;height: 40px;font-size: 15px"
+                        onchange="changeOrder()" id="ordered_by">
+                    <option value="high-rated">High-rated</option>
+                    <option value="popular">Most popular</option>
                 </select>
             </div>
 
@@ -63,11 +63,12 @@
                     <div class="mt-4 form-control">
                         <div class="row">
                             <div class="col-9">
-                                <h4> <a href="{% url 'restaurant:detail' business.business_id %}" class="text-dark">{{ business.name }}</a></h4>
+                                <h4><a href="{% url 'restaurant:detail' business.business_id %}"
+                                       class="text-dark">{{ business.name }}</a></h4>
                                 <div style="font-size: 14px; margin-top: -10px">{{ business.categories }}</div>
                                 <div class="form-inline">
                                     <div class="mr-1" style="font-size: 15px">{{ business.stars }}</div>
-                                    <select class="ratingStar">
+                                    <select class="ratingStar" id="{{ business.business_id }}">
                                         <option value="1">1</option>
                                         <option value="2">2</option>
                                         <option value="3">3</option>
@@ -92,12 +93,23 @@
                 {% endfor %}
             {% else %}
             {% endif %}
-            <div class="mt-4 text-center" style="font-size: 19px">
-                Page: <a href="#">1</a> 2 3 4 5 6 7 8 9 10 ...
+            <div class="mt-4" style="font-size: 17px">
+                <div id="page_info" class="float-left"></div>
+                <div class="float-right">
+                    {% if business_list.has_previous %}
+                        <button class="btn-sm" onclick="changePage({{ business_list.previous_page_number }})">Prev
+                        </button>
+                    {% endif %}
+                    <a id="page_control"></a>
+                    {% if business_list.has_next %}
+                        <button class="btn-sm" onclick="changePage({{ business_list.next_page_number }})">Next</button>
+                    {% endif %}
+                </div>
             </div>
         </div>
         <div class="col">
-            <div style="position:fixed; background-color: lightgoldenrodyellow; font-size: 16px; height: 600px" class="form-control">
+            <div style="position:fixed; background-color: lightgoldenrodyellow; font-size: 16px; height: 600px"
+                 class="form-control">
                 <br>
                 <h5>How to use?</h5>
                 1. Sign up and login
@@ -159,13 +171,35 @@
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
 <script src="{% static 'restaurant/jquery.barrating.min.js' %}"></script>
+<script src="{% static 'restaurant/search_result.js' %}"></script>
 <script type="text/javascript">
+    function changeOrder() {
+        window.location.href = "{{ request.path }}" + "?keywords=" + getUrlVars()['keywords'] + "&address=" + getUrlVars()['address'] + "&ordered=" + $("#ordered_by").val() + "&page=" + 1;
+    }
+
+    function changePage(pageNumber) {
+        window.location.href = "{{ request.path }}" + "?keywords=" + getUrlVars()['keywords'] + "&address=" + getUrlVars()['address'] + "&ordered=" + getUrlVars()['ordered'] + "&page=" + pageNumber;
+    }
+
+    function updatePage() {
+        let page = getUrlVars()['page'];
+        let ordered = getUrlVars()['ordered'];
+
+        $("#ordered_by").val(ordered);
+        $("#page_info").append("<div>Page " + page + " of {{business_list.paginator.num_pages}} </div>");
+        //update page control
+        $("#page_control").append("<a class='ml-2 mr-2'>" + page + "</a>");
+    }
+
     $(function () {
-        $('.ratingStar').barrating({
-            theme: 'fontawesome-stars-o',
-            readonly: true,
-            initialRating: 5
-        });
+        updatePage();
+        {% for business in business_list %}
+            $('#{{ business.business_id }}').barrating({
+                theme: 'fontawesome-stars-o',
+                readonly: true,
+                initialRating: {{ business.stars }}
+            });
+        {% endfor %}
     });
 </script>
 </body>

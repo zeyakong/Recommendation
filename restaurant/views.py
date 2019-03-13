@@ -8,17 +8,18 @@ from django.urls import reverse
 import datetime
 
 from .models import Business, Review
-from users.models import UserReview
+from users.models import UserReview, User
 from django.db.models import Q
 
 
 def search_result(request):
     keywords = request.GET.get('keywords')
     address = request.GET.get('address')
-    print(keywords, address)
+    ordered = request.GET.get('ordered')
+    page = request.GET.get('page') if request.GET.get('page') else 1
 
     # q = Q()
-    #
+
     # for var in category_list:
     #     q = Q(categories=var) | q
 
@@ -34,16 +35,19 @@ def search_result(request):
         business_list = Business.objects.filter(
             (Q(name__iregex=keywords) | Q(categories__iregex=keywords)) & (Q(address__iregex=address) | Q(
                 city__iregex=address)))
-    # business_list = business_list.order_by('-review_count')
+    if ordered == 'high-rated':
+        business_list = business_list.order_by('-stars')
+    else:
+        business_list = business_list.order_by('-review_count')
     paginator = Paginator(business_list, 15)
-    business_list = paginator.page(1)
+    business_list = paginator.page(page)
 
     # this code will load the first text review to the restaurant. it might slow the system.
     for var in business_list:
         first_text = ''
-        list = Review.objects.filter(business_id=var.business_id)
-        if list[0] is not None:
-            first_text = list[0].text
+        list_temp = Review.objects.filter(business_id=var.business_id)
+        if list_temp[0] is not None:
+            first_text = list_temp[0].text
         var.attributes = first_text[0:350]
 
     context = {
@@ -53,17 +57,16 @@ def search_result(request):
 
 
 def detail(request, business_id):
-    # context = ''
-    # return render(request, 'restaurant/search_result.html', context)
+    page_num = request.GET.get('page') if request.GET.get('page') else 1
     business = get_object_or_404(Business, pk=business_id)
-    review_list = Review.objects.filter(business_id=business_id)
-    paginator = Paginator(review_list, 15)
-    review_list = paginator.page(1)
-    user_review = UserReview.objects.filter(business_id=business_id)
+    customer_review_list = Review.objects.filter(business_id=business_id).order_by('-date')
+    paginator = Paginator(customer_review_list, 15)
+    customer_review_list = paginator.page(page_num)
+    user_review_list = UserReview.objects.filter(business_id=business_id).order_by('-date')
     context = {
         'business': business,
-        'customer_review_list': review_list,
-        'user_review_list': user_review
+        'customer_review_list': customer_review_list,
+        'user_review_list': user_review_list
     }
 
     return render(request, 'restaurant/detail.html', context)
@@ -71,20 +74,21 @@ def detail(request, business_id):
 
 def add_review(request, business_id):
     print('business id:', business_id)
-    v1 = request.POST.get('star_rating')
-    v2 = request.POST.get('text_review')
-    v3 = request.POST.get('username')
-    print('star:', v1, '|text', v2, '|username:', v3)
-    user_review = UserReview(rating_id=uuid.uuid4(), business_id=business_id, user_name=v3, stars=v1,
-                             date=datetime.datetime.now(), text=v2)
+    rating = request.POST.get('star_rating')
+    text = request.POST.get('text_review')
+    username = request.POST.get('username')
+    print('star:', rating, '|text', text, '|username:', username)
+    user_review = UserReview(id=uuid.uuid4(), business=Business.objects.get(business_id=business_id),
+                             user=User.objects.get(username=username), stars=rating,
+                             date=datetime.date.today(), text=text)
     user_review.save()
 
     return HttpResponseRedirect(reverse('restaurant:detail', args=(business_id,)))
 
 
 def generate_rec(request, user_name):
-    user_review_list = UserReview.objects.filter(user_name=user_name)
+    user_review_list = UserReview.objects.filter(user=User.objects.get(username=user_name))
     context = {
-        'user_review_list' : user_review_list,
+        'user_review_list': user_review_list,
     }
-    return render(request,'restaurant/generate_rec.html', context)
+    return render(request, 'restaurant/generate_rec.html', context)

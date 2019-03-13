@@ -61,6 +61,8 @@
                 </div>
                 <input class="form-control" type="text" placeholder="Address" name="address" aria-describedby="basic-addon3">
             </div>
+            <input type="hidden" name="ordered" value="high-rated">
+            <input type="hidden" name="page" value="1">
             <button type="submit" class="btn btn-outline-info ml-1 form-control" style="width: 10%">Search</button>
         </form>
     </div>
@@ -68,7 +70,6 @@
 
 <div id="content_2">
     <div class="container">
-        <p>
         <h1 class="text-center">Get Started</h1>
         <h5 class="mt-4">1. Sign up and login to the system</h5>
         <br>
@@ -80,8 +81,6 @@
         <br>
         *The data-set is from the
         <button class="btn btn-sm btn-outline-info">www.yelp.com</button>
-
-        </p>
     </div>
 </div>
 
@@ -159,7 +158,6 @@
             <li>Sparse matrix problem</li>
             <li>Dynamic model (auto-build the matrix)</li>
         </ul>
-        <button class="btn btn-primary">Contribute this Project</button>
 
         <h4 class="mt-4">Testing Results</h4>
         <img src="{% static 'users/result_table.png' %}">
