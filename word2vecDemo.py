@@ -69,7 +69,6 @@ def run_glove_word2vec():
     filename = 'glove.6B.50d.txt.word2vec'
     model = KeyedVectors.load_word2vec_format(filename, binary=False)
     # model.wv.save_word2vec_format('model.bin')
-
     # calculate: (king - man) + woman = ?
     # result = model.most_similar(positive=['woman', 'king'], negative=['man'], topn=1)
     vec1 = model['food']

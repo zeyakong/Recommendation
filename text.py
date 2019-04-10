@@ -23,7 +23,7 @@ def get_data():
         busi_list.append(var.business_id)
     return text_list, user_list, busi_list
 
-                
+
 def get_text():
     text_list = []
     # user_list = []
@@ -37,7 +37,7 @@ def get_text():
 
 
 def load_pickle(file):
-    print("Load the",file,"matrix...")
+    print("Load the", file, "matrix...")
     pkl_file = open(file, 'rb')
     data = pickle.load(pkl_file)
     # pprint.pprint(data)
@@ -130,18 +130,10 @@ def start():
 
 def get_words_vec():
     text_list = get_text()
-    # text_list = ['I like you free good',
-    #              'I hate you bade good',
-    #              'how are you, good ,street bade ']
     vectorizer = CountVectorizer(max_features=200, lowercase=True, stop_words='english')
-    X = vectorizer.fit_transform(text_list)
-
-    # print(vectorizer.get_feature_names())
-    # print(X.toarray().shape)
-
-    # print(vectorizer.vocabulary_)
+    result = vectorizer.fit_transform(text_list)
     output = open('bag_of_words_200.pkl', 'wb')
-    pickle.dump(X.toarray(), output)
+    pickle.dump(result.toarray(), output)
     output.close()
 
 
@@ -156,16 +148,13 @@ def get_doc_vec_by_word2vec():
                 temp = words_embedding[ones]
 
 
-
-
-
 def get_words_TFIDF():
     text_list = get_text()
     # text_list = ['I like you free good',
     #              'I hate you bade good',
     #              'how are you, good ,street bade ']
 
-    vectorizer= TfidfVectorizer(stop_words='english', lowercase=True, max_features=200)
+    vectorizer = TfidfVectorizer(stop_words='english', lowercase=True, max_features=200)
 
     X = vectorizer.fit_transform(text_list)
     output = open('TFIDF_200.pkl', 'wb')

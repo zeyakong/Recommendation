@@ -189,30 +189,60 @@
         <div class="col">
             <h6>Give your review:</h6>
             {% if user.is_authenticated %}
-                <div class="form-inline">
-                    <img src="{% static 'restaurant/user.png' %}" style="height: 50px;width: 50px">
-                    <span style="font-size: 14px;" class="ml-2">{{ user.username }}</span>
-                </div>
-                <form action="{% url 'restaurant:add_review' business.business_id %}" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="username" value="{{ user.username }}">
-                    <div class="form-inline">
-                        <select id="yourStar" style="width: 100%" name="star_rating">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </select>
-                        <div class="text-danger mb-1 ml-3 font-weight-bold" style="font-size:15px"
-                             id="ratingText"></div>
+                {% if has_review == 1 %}
+                    <div>You already have a review for this restaurant. You can</div>
+                    <button class="btn btn-sm btn-info" onclick="updateReview()">Update Review</button>
+                    <button class="btn btn-sm btn-danger" onclick="removeReview()">Remove Review</button>
+                    <div id="update_review_form">
+                    <div class="form-inline mt-3">
+                        <img src="{% static 'restaurant/user.png' %}" style="height: 50px;width: 50px">
+                        <span style="font-size: 14px;" class="ml-2">{{ user.username }}</span>
                     </div>
-                    <textarea class="form-control" style="box-shadow: none; height: 300px; font-size: 17px;"
-                              name="text_review"
-                              placeholder="Please give a text review as well as the star rating. &#10;It will help the system to do more precise recommendation."></textarea>
-                    <button class="btn btn-sm btn-success mt-2" type="submit">Post Review</button>
-                </form>
-
+                    <form action="{% url 'restaurant:op_review' business.business_id %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="username" value="{{ user.username }}">
+                        <div class="form-inline">
+                            <select id="yourStar" style="width: 100%" name="star_rating">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                            <div class="text-danger mb-1 ml-3 font-weight-bold" style="font-size:15px"
+                                 id="ratingText"></div>
+                        </div>
+                        <textarea class="form-control" style="box-shadow: none; height: 300px; font-size: 17px;"
+                                  name="text_review"
+                                  placeholder="Please give a text review as well as the star rating. &#10;It will help the system to do more precise recommendation."></textarea>
+                        <button class="btn btn-sm btn-success mt-2" type="submit">Update Review</button>
+                    </form>
+                    </div>
+                {% else %}
+                    <div class="form-inline">
+                        <img src="{% static 'restaurant/user.png' %}" style="height: 50px;width: 50px">
+                        <span style="font-size: 14px;" class="ml-2">{{ user.username }}</span>
+                    </div>
+                    <form action="{% url 'restaurant:add_review' business.business_id %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="username" value="{{ user.username }}">
+                        <div class="form-inline">
+                            <select id="yourStar" style="width: 100%" name="star_rating">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                            <div class="text-danger mb-1 ml-3 font-weight-bold" style="font-size:15px"
+                                 id="ratingText"></div>
+                        </div>
+                        <textarea class="form-control" style="box-shadow: none; height: 300px; font-size: 17px;"
+                                  name="text_review"
+                                  placeholder="Please give a text review as well as the star rating. &#10;It will help the system to do more precise recommendation."></textarea>
+                        <button class="btn btn-sm btn-success mt-2" type="submit">Post Review</button>
+                    </form>
+                {% endif %}
             {% else %}
                 <div class="form-control" style="height:120px;background-color: lightgoldenrodyellow">
                     <div style="font-size: 16px;"> you must login first and you can give a review.</div>
@@ -236,8 +266,8 @@
 
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
         integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
@@ -249,6 +279,7 @@
 <script src="{% static 'restaurant/jquery.barrating.min.js' %}"></script>
 <script type="text/javascript">
     $(function () {
+        $("#update_review_form").hide();
         $('.ratingStar').barrating({
             theme: 'fontawesome-stars-o',
             readonly: true,
@@ -283,6 +314,34 @@
         });
         {#$('.reviewText').val( ).replace(/\n/g, "<br>");#}
     });
+
+    function removeReview() {
+        if (confirm('Are you sure you want to delete your review for this restaurant?')) {
+            // Save it!
+            $.ajax({
+                url: '{% url 'restaurant:op_review' business.business_id %}',
+                method: 'DELETE',
+                headers:{
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    alert("Successfully delete!");
+                    window.location.href = "{{ request.path }}";
+                }
+            })
+        } else {
+            // Do nothing!
+        }
+    }
+
+    function updateReview() {
+        var update_form = $("#update_review_form");
+        if(update_form.hide()){
+            update_form.show();
+        }else{
+            update_form.hide();
+        }
+    }
 </script>
 </body>
 </html>
