@@ -9,14 +9,11 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 import datetime
 
-from algorithms.create_stars_matrix import find_similar_user, find_rest
 from algorithms.rating_based_algorithms import user_cf, rating_recommend
-from algorithms.recommendation import rm_predict
 from algorithms.text_based_algorithms import text_recommend
 from .models import Business, Review
 from users.models import UserReview, User
 from django.db.models import Q
-from django.http import JsonResponse
 
 
 def search_result(request):
