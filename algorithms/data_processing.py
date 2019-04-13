@@ -22,21 +22,6 @@ def create_rating_matrix():
     print('Finish creating, output file name:', filename, 'len of the matrix: ', len(rating_matrix))
 
 
-def create_rating_matrix_reverse():
-    rating_matrix = defaultdict(dict)
-    # get all reviews
-    review_list = Review.objects.all()
-    print('Start creating star ratings matrix...')
-    for one_review in review_list:
-        rating_matrix[one_review.business_id][one_review.user_id] = one_review.stars
-
-    filename = 'rating_matrix_reverse.pkl'
-    output = open(filename, 'wb')
-    pickle.dump(rating_matrix, output)
-    output.close()
-    print('Finish creating, output file name:', filename, 'len of the matrix: ', len(rating_matrix))
-
-
 def create_bag_of_words_matrix():
     # get all texts.
     text_list = []
@@ -101,6 +86,21 @@ def create_features_list():
     print('Finish creating, output file name:', filename, 'len of the matrix: ', len(vectorizer.get_feature_names()))
 
 
+def create_text_matrix():
+    text_matrix = defaultdict(dict)
+    # get all reviews
+    review_list = Review.objects.all()
+    print('Start creating text reviews matrix...')
+    for one_review in review_list:
+        text_matrix[one_review.user_id][one_review.business_id] = one_review.text
+
+    filename = 'text_matrix.pkl'
+    output = open(filename, 'wb')
+    pickle.dump(text_matrix, output)
+    output.close()
+    print('Finish creating, output file name:', filename, 'len of the matrix: ', len(text_matrix))
+
+
 if __name__ == '__main__':
-    create_features_list()
+    # create_text_matrix()
     exit()

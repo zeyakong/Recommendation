@@ -1,3 +1,5 @@
+import pprint
+
 from restaurant.models import Customer, Review, Business
 import numpy as np
 import nltk

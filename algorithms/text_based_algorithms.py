@@ -7,48 +7,21 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
 from algorithms.algorithm_utils import load_pickle, find_sub_matrix, euclidean_sim, cosine_sim, pearson_sim, \
     recommend_restaurant
-from restaurant.models import Review
 from users.models import UserReview, User
 
 
 def user_cf(username, method, similarity_method):
-    # load pickles
-    if method == 'bag_of_words':
-        vectorizer = CountVectorizer(max_features=200, lowercase=True, stop_words='english')
-    elif method == 'tfidf':
-        vectorizer = TfidfVectorizer(max_features=200, lowercase=True, stop_words='english')
-    else:
-        vectorizer = CountVectorizer(max_features=200, lowercase=True, stop_words='english')
-    # get the user vector, the user is the system new user, so, it is from the userReviews model
+    # first find the list of the restaurant the user went before.
+    # user_restaurant_list = [ 'business_id_1', 'business_id_2', ...  ]
+    user_restaurant_list = list()
+    user_dict = dict()
+    user_text_list = list()
     user_review_list = UserReview.objects.filter(user=User.objects.get(username=username))
 
-    user_text_list = list()
     for one_review in user_review_list:
+        user_dict[one_review.business_id] = one_review.text
+        user_restaurant_list.append(one_review.business_id)
         user_text_list.append(one_review.text)
-
-    # get all texts.
-    text_list = []
-    review_list = Review.objects.all()
-    for var in review_list:
-        text_list.append(var.text)
-    result = vectorizer.fit_transform(text_list).toarray()
-    index = 0
-    text_matrix = defaultdict(dict)
-    for var in review_list:
-        text_matrix[var.user_id][var.business_id] = result[index]
-        index = index + 1
-
-    user_vector = vectorizer.transform(user_text_list).toarray()
-
-    # add the vector into the dict
-    user_dict = dict()
-    # indicate the restaurant that user went
-    restaurant_keys = list()
-    count = 0
-    for one_review in user_review_list:
-        user_dict[one_review.business_id] = user_vector[count]
-        restaurant_keys.append(one_review.business_id)
-        count = count + 1
 
     # now we have the user's text vector and we can calculate the similarity
     """
@@ -57,19 +30,43 @@ def user_cf(username, method, similarity_method):
        1. find the users list which the new user and customers have [threshold] common rating.
        this function is a recursive function: first the min of user_vector is 5, 
        so, the threshold is 80% : 4.
-       """
-    threshold = len(user_dict.keys()) - 1  # means # of the common rating
+    """
+
+    # load text_matrix
+    text_matrix = load_pickle('text_matrix.pkl')
+    threshold = len(user_restaurant_list) - 1  # means # of the common rating
     sub_matrix = find_sub_matrix(user_dict, text_matrix, threshold)
     while len(sub_matrix.keys()) < 30:
         threshold = threshold - 1
         sub_matrix = find_sub_matrix(user_dict, text_matrix, threshold)
+    pprint.pprint(len(sub_matrix))
 
+    # load pickles
+    if method == 'bag_of_words':
+        vectorizer = CountVectorizer(max_features=200, lowercase=True, stop_words='english')
+    else:
+        vectorizer = TfidfVectorizer(max_features=200, lowercase=True, stop_words='english')
+
+    all_text_list = list()
+    for one_user in sub_matrix.keys():
+        for one_review in sub_matrix[one_user].keys():
+            all_text_list.append(sub_matrix[one_user][one_review])
+
+    text_vectors = vectorizer.fit_transform(all_text_list).toarray()
+    user_vector = vectorizer.transform(user_text_list).toarray()
+    # we didn't change the sub_matrix, which means the order of the keys() is same, replace the text into
+    # text-vector
+    count = 0
+    for one_user in sub_matrix.keys():
+        for one_review in sub_matrix[one_user].keys():
+            sub_matrix[one_user][one_review] = text_vectors[count]
+            count = count + 1
     # now we got the sub matrix and we can process
     similarity = dict()
     for one_similar_user in sub_matrix.keys():
         # transfer the dict into vector to calculate.
         customer_vector = list()
-        for one_restaurant in restaurant_keys:
+        for one_restaurant in user_restaurant_list:
             if one_restaurant in sub_matrix[one_similar_user]:
                 customer_vector.append(sub_matrix[one_similar_user][one_restaurant])
             else:
@@ -93,11 +90,12 @@ def user_cf(username, method, similarity_method):
                 else:
                     sim_score = pearson_sim(vector1=customer_vector[i], vector2=user_vector[i]) + sim_score
         # sim_score = sim_score + random.uniform(0, 1.2)
-        similarity[one_similar_user] = sim_score / count
+        if count == 0:
+            similarity[one_similar_user] = 0
+        else:
+            similarity[one_similar_user] = sim_score / count
     # get top 15 similar users
     top_similar_users = collections.Counter(similarity).most_common(15)
-
-    # now we found similar 15 users and we can generate the recommendation like rating based.
     return top_similar_users, recommend_restaurant(similarity, user_dict)
 
 
@@ -115,8 +113,8 @@ def is_valid_vector(v):
         return False
 
 
-# if __name__ == '__main__':
-#     simi_user, simi_rec = user_cf('123', 'tfidf', 'cosine')
-#     pprint.pprint(simi_rec)
-#     pprint.pprint(simi_user)
-#     exit()
+if __name__ == '__main__':
+    simi_user, simi_rec = user_cf('123', 'bag_of_words', 'cosine')
+    pprint.pprint(simi_rec)
+    pprint.pprint(simi_user)
+    exit()

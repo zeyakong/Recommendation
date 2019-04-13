@@ -62,7 +62,7 @@ def recommend_restaurant(similarity, user_dict):
     top_similar_users = collections.Counter(similarity).most_common(15)
 
     # load rating matrix
-    rating_matrix = load_pickle('algorithms/rating_matrix.pkl')
+    rating_matrix = load_pickle('rating_matrix.pkl')
 
     # start recommend. From the sub matrix to find the restaurants the target user never go.
     # find current sub matrix:
