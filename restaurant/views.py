@@ -1,7 +1,9 @@
 import collections
 import json
+import pprint
 import uuid
 
+import numpy
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseRedirect
@@ -9,6 +11,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 import datetime
 
+from algorithms.advanced_text_based_algorithms import load_word2vec_model, word2vec_recommend, linear_regression_model
 from algorithms.rating_based_algorithms import user_cf, rating_recommend
 from algorithms.text_based_algorithms import text_recommend
 from .models import Business, Review
@@ -139,31 +142,16 @@ def generate_rec(request, user_name):
                                                                         similarity_method=similarity_value)
         elif method_value == '3':
             # 3 word2vec
-            top_similar_users, top_similar_restaurants = text_recommend(username=request.user.username,
-                                                                        method='word2vec',
-                                                                        similarity_method=similarity_value)
+            network = request.POST.get('networkValue')
+            wv_model = load_word2vec_model(network)
+            top_similar_users, top_similar_restaurants = word2vec_recommend(username=request.user.username,
+                                                                            model=wv_model)
         else:
             # 5 both
-            top_similar_users, top_similar_restaurants = rating_recommend(username=request.user.username,
-                                                                          similarity_method=similarity_value)
-            top_similar_users_text, top_similar_restaurants_text = text_recommend(username=request.user.username,
-                                                                                  method='bag-of-words',
-                                                                                  similarity_method=similarity_value)
-            top_similar_users = top_similar_users[0:7] + top_similar_users_text[0:8]
-            top_similar_restaurants = top_similar_restaurants[0:3]
-            top_restaurants_id = list()
-            for one in top_similar_restaurants:
-                top_restaurants_id.append(one[0])
-            count = 0
-            for one in top_similar_restaurants_text:
-                if one[0] not in top_restaurants_id and count < 6:
-                    top_similar_restaurants.append(one)
-                    top_restaurants_id.append(one[0])
-                    count = count + 1
-        copy = dict()
-        for one in top_similar_restaurants:
-                copy[one[0]] = one[1]
-        top_similar_restaurants = collections.Counter(copy).most_common(5)
+            rating_users, text_users, top_similar_restaurants = linear_regression_model(username=request.user.username)
+            pprint.pprint(top_similar_restaurants)
+            top_similar_users = rating_users + text_users
+
         result = list()
         for one_rest in top_similar_restaurants:
             temp = dict()
@@ -177,10 +165,26 @@ def generate_rec(request, user_name):
             'results': result,
             'msg': 'target user: ' + user_name + '. method: ' + method_value + '. similarity:' + similarity_value + '. algorithm: userCF'
         }
-        return HttpResponse(json.dumps(content))
+        return HttpResponse(json.dumps(content, cls=MyEncoder))
     else:
         user_review_list = UserReview.objects.filter(user=User.objects.get(username=user_name))
         context = {
             'user_review_list': user_review_list,
         }
         return render(request, 'restaurant/generate_rec.html', context)
+
+
+class MyEncoder(json.JSONEncoder):
+    """
+    The float 32 might cause json,dumps bugs
+    """
+
+    def default(self, obj):
+        if isinstance(obj, numpy.integer):
+            return int(obj)
+        elif isinstance(obj, numpy.floating):
+            return float(obj)
+        elif isinstance(obj, numpy.ndarray):
+            return obj.tolist()
+        else:
+            return super(MyEncoder, self).default(obj)

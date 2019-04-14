@@ -15,14 +15,15 @@ def euclidean_sim(vector1, vector2):
 def cosine_sim(vector1, vector2):
     # calculate cos_distance
     cos_distance = np.dot(vector1, vector2) / (np.linalg.norm(vector1) * (np.linalg.norm(vector2)))
-    # normalize
-    return 0.5 + 0.5 * cos_distance
+    # normalize. update no need to normalize
+    return cos_distance
 
 
 def pearson_sim(vector1, vector2):
     vector1 = vector1.tolist()
     vector2 = vector2.tolist()
-    return 0.5 + 0.5 * np.corrcoef(vector1, vector2)[0][1]
+    # no need to normalize. -1 means this user is opposite to the target.
+    return np.corrcoef(vector1, vector2)[0][1]
 
 
 # find two vectors' nonzero elements and return the two sub vectors.
@@ -62,7 +63,7 @@ def recommend_restaurant(similarity, user_dict):
     top_similar_users = collections.Counter(similarity).most_common(15)
 
     # load rating matrix
-    rating_matrix = load_pickle('rating_matrix.pkl')
+    rating_matrix = load_pickle('algorithms/rating_matrix.pkl')
 
     # start recommend. From the sub matrix to find the restaurants the target user never go.
     # find current sub matrix:

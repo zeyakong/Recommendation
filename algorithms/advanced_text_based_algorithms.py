@@ -3,10 +3,13 @@ import pprint
 import time
 
 from gensim.models import KeyedVectors
+from joblib import load
 from nltk import word_tokenize, PorterStemmer
 from nltk.corpus import stopwords
 
 from algorithms.algorithm_utils import load_pickle, find_sub_matrix, recommend_restaurant
+from algorithms.rating_based_algorithms import rating_recommend
+from algorithms.text_based_algorithms import text_recommend
 from users.models import UserReview, User
 
 """
@@ -29,7 +32,7 @@ def test():
 
 def load_word2vec_model(filename):
     binary = False
-    pre_path = '../'
+    pre_path = 'algorithms/'
     if filename == 'GoogleNews-vectors-negative300.bin':
         binary = True
     return KeyedVectors.load_word2vec_format(pre_path + filename, binary=binary)
@@ -57,7 +60,7 @@ def word2vec_recommend(username, model):
     """
 
     # load text_matrix
-    text_matrix = load_pickle('text_matrix.pkl')
+    text_matrix = load_pickle('algorithms/text_matrix.pkl')
     threshold = len(user_restaurant_list) - 1  # means # of the common rating
     sub_matrix = find_sub_matrix(user_dict, text_matrix, threshold)
     while len(sub_matrix.keys()) < 30:
@@ -97,15 +100,48 @@ def tokenizer(input_text, wv_model):
     return clean_tokens
 
 
+def linear_regression_model(username, similarity_method='cosine', method='bag_of_words'):
+    similar_user_text_based, similar_restaurant_text_based = text_recommend(username=username, method=method,
+                                                                            similarity_method=similarity_method)
+    similar_user_rating_based, similar_restaurant_rating_based = rating_recommend(username,
+                                                                                  similarity_method=similarity_method)
+    # load linear regression model
+    liner_regression_model = load('algorithms/trained_model.joblib')
+    # prepare the X values, first find all the restaurant list.
+    restaurant_list = list()
+    for one in range(len(similar_restaurant_rating_based)):
+        if similar_restaurant_rating_based[one][0] not in restaurant_list:
+            restaurant_list.append(similar_restaurant_rating_based[one][0])
+        if similar_restaurant_text_based[one][0] not in restaurant_list:
+            restaurant_list.append(similar_restaurant_text_based[one][0])
+    result = dict()
+    X = list()
+    for one_rest in restaurant_list:
+        # get rating score
+        r_score = get_score(similar_restaurant_rating_based, one_rest)
+        t_score = get_score(similar_restaurant_text_based, one_rest)
+        X.append([r_score, t_score])
+    # use model to predict
+    Y = liner_regression_model.predict(X)
+    count = 0
+    for one in restaurant_list:
+        result[one] = Y[count][0]
+        count = count + 1
+    return similar_user_rating_based, similar_user_text_based, collections.Counter(result).most_common(5)
 
 
+def get_score(similar_restaurants, restaurant_id):
+    for one in similar_restaurants:
+        if restaurant_id == one[0]:
+            return one[1]
+    return 0
 
 # if __name__ == '__main__':
 #     print('loading...')
 #     model = load_word2vec_model('glove.6B.50d.txt.word2vec')
 #     print('Finish loading')
 #     start = time.time()
-#     simi_user, simi_rec = use_word2vec('123', model)
+#     simi_user, simi_rec = word2vec_recommend('123', model)
 #     end = time.time()
 #     print(end - start)
 #     pprint.pprint(simi_rec)

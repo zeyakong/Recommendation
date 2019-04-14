@@ -64,21 +64,20 @@ def user_cf(username, similarity_method):
         v2 = np.array(customer_vector)
         # at that time we calculate the zero value:
         # v1, v2 = find_2vector_nonzero_sub(user_vector, customer_vector)
-        if len(v1)>0 and len(v2)>0:
+        if len(v1) > 0 and len(v2) > 0:
             # find similarity
             if similarity_method == 'euclidean':
                 sim_score = euclidean_sim(vector1=v1, vector2=v2)
             elif similarity_method == 'cosine':
                 sim_score = cosine_sim(vector1=v1, vector2=v2)
             else:
-                print(v1, v2)
                 sim_score = pearson_sim(vector1=v1, vector2=v2)
         else:
-            sim_score =0
+            sim_score = 0
         similarity[one_similar_user] = sim_score
     # get top 15 similar users
     top_similar_users = collections.Counter(similarity).most_common(15)
-    return top_similar_users, recommend_restaurant(similarity,user_dict)
+    return top_similar_users, recommend_restaurant(similarity, user_dict)
 
 
 def item_cf(rating_matrix, username, similarity_method, rec_type='popular'):

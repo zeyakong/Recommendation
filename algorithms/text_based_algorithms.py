@@ -33,7 +33,7 @@ def user_cf(username, method, similarity_method):
     """
 
     # load text_matrix
-    text_matrix = load_pickle('text_matrix.pkl')
+    text_matrix = load_pickle('algorithms/text_matrix.pkl')
     threshold = len(user_restaurant_list) - 1  # means # of the common rating
     sub_matrix = find_sub_matrix(user_dict, text_matrix, threshold)
     while len(sub_matrix.keys()) < 30:
@@ -112,9 +112,9 @@ def is_valid_vector(v):
                 return True
         return False
 
-
-if __name__ == '__main__':
-    simi_user, simi_rec = user_cf('123', 'bag_of_words', 'cosine')
-    pprint.pprint(simi_rec)
-    pprint.pprint(simi_user)
-    exit()
+#
+# if __name__ == '__main__':
+#     simi_user, simi_rec = user_cf('123', 'bag_of_words', 'cosine')
+#     pprint.pprint(simi_rec)
+#     pprint.pprint(simi_user)
+#     exit()
