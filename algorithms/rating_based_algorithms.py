@@ -77,7 +77,7 @@ def user_cf(username, similarity_method):
         similarity[one_similar_user] = sim_score
     # get top 15 similar users
     top_similar_users = collections.Counter(similarity).most_common(15)
-    return top_similar_users, recommend_restaurant(similarity, user_dict)
+    return top_similar_users, recommend_restaurant(similarity, user_dict, username)
 
 
 def item_cf(rating_matrix, username, similarity_method, rec_type='popular'):

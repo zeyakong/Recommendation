@@ -52,7 +52,9 @@
     <div style="margin-top: 100px"></div>
     <div id="result"></div>
     <div id='content'>
-        <div class="mt-4" style="width: 70%">
+    <div class="row mt-4">
+        <div class="col-6">
+            <div>
             <h5>Generate Recommendation</h5>
             <div class="input-group" style="font-size: 17px;">
                 <div class="input-group-prepend">
@@ -73,7 +75,7 @@
                     <label class="input-group-text font-weight-bold"
                            style="font-size: 17px;width:100px;">Similarity</label>
                 </div>
-                <select class="custom-select" id="similarity_value">
+                <select class="custom-select" id="similarity_value" onchange="openBtn()">
                     <option value="euclidean">Euclidean Distance</option>
                     <option value="cosine">Cosine Similarity</option>
                     <option value="pearson">Pearson coefficient</option>
@@ -84,7 +86,7 @@
                     <label class="input-group-text font-weight-bold"
                            style="font-size: 17px;width:100px;">Network</label>
                 </div>
-                <select class="custom-select" id="network">
+                <select class="custom-select" id="network" onchange="openBtn()">
                     <option value="GoogleNews-vectors-negative300.bin">GoogleNews vectors negative300</option>
                     <option value="glove.6B.50d.txt.word2vec">glove.6B.50d</option>
                     <option value="glove.6B.100d.txt.word2vec">glove.6B.100d</option>
@@ -94,6 +96,12 @@
             </div>
             <button class="btn btn-primary mt-2" onclick="generate()" id="generate_btn">GENERATE</button>
         </div>
+        </div>
+        <div class="col">
+            <small id="generate_msg"></small>
+        </div>
+    </div>
+
         <div class="row">
             <div class="col-5">
                 <div class="mt-5 form-control" style="height: 300px">
@@ -177,6 +185,7 @@
         $("#content").show();
         $("#result").hide();
         $("#network_form").hide();
+        $("#generate_btn").prop('disabled', true);
         $("#similarity_value").prop("selectedIndex", -1);
         $("#method_value").prop("selectedIndex", -1);
 
@@ -224,8 +233,6 @@
                 'X-CSRFToken': '{{ csrf_token }}',
             },
             success: function (data) {
-
-                console.log(data);
                 showResult(data);
             }
         })
@@ -267,7 +274,7 @@
 
         resultArea.append("<h6 class='mt-3'>Top 5 recommended restaurants:</h6>");
         for (let i = 0; i < data.results.length; i++) {
-            resultArea.append("<div><a href='" + "{% url 'restaurant:detail' business_id=123 %}".replace('123', data.results[i].id) + "' target = '_blank'>" + data.results[i].name + "</a><br> <small>Weighted score: " + data.results[i].stars + "<small><div><br>");
+            resultArea.append("<div><a href='" + "{% url 'restaurant:detail' business_id=123 %}".replace('123', data.results[i].id) + "' target = '_blank'>" + data.results[i].name + "</a><br> <small>Predict score: " + data.results[i].stars + "<small><div><br>");
         }
 
         resultArea.append("<hr><h6 class='mt-3'>console output</h6>");
@@ -282,21 +289,45 @@
         $("#result").hide();
     }
 
+    function openBtn() {
+        let generateBtn = $("#generate_btn");
+        generateBtn.prop('disabled', false);
+    }
+
     function updateForm() {
         let method = $("#method_value");
         let similarity = $("#similarity_value");
         let network = $("#network");
         let networkForm = $("#network_form");
+        let generateBtn = $("#generate_btn");
+        let genMsg = $("#generate_msg");
+        generateBtn.prop('disabled', true);
+        genMsg.empty();
 
-        if (method.val() === '3'){
+        if (method.val() === '3') {
             similarity.val('cosine');
-            similarity.prop('disabled',true);
+            similarity.prop('disabled', true);
             networkForm.show();
             network.val('null');
-        }else{
-            similarity.prop('disabled',false);
+        } else {
+            similarity.prop('disabled', false);
             similarity.val('null');
             networkForm.hide();
+        }
+
+        if(method.val() === '0'){
+            genMsg.append('Rating-based:<br>The rating-based algorithem uses user-based collaborative filtering to generate recommendations, which will find the similar users and recommend items based on those users<br><a href=\'https://en.wikipedia.org/wiki/Collaborative_filtering\' target=\'_blank\'>collaborative filterting algorithm</a>');
+        }else if(method.val() === '1'){
+            genMsg.append('text-based: bag_of_words<br>The bag-of-words model is a simplifying representation used in natural language processing. In this model, a text (such as a sentence or a document) is represented as the bag (multiset) of its words, disregarding grammar and even word order but keeping multiplicity.<br><a href=\'https://en.wikipedia.org/wiki/Bag-of-words_model\' target=\'_blank\'>bag of words</a> <a class=\'ml-3\' href=\'https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html\' target=\'_blank\'>sklearn library</a> <a class=\'ml-3\' href=\'https://www.nltk.org/\' target=\'_blank\'>nltk library</a>');
+        }else if(method.val() === '2'){
+            genMsg.append('text-based: TF_IDF<br>TF-IDF, short for term frequency–inverse document frequency, is a statistical method used to assess the importance of a word for a file set or one of the files in a corpus. The importance of a word increases proportionally with the number of times it appears in the file, but it also decreases inversely with the frequency it appears in the corpus.<br><a href=\'https://en.wikipedia.org/wiki/Tf%E2%80%93idf\' target=\'_blank\'>TF-IDF</a> <a class=\'ml-3\' href=\'https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html\' target=\'_blank\'>sklearn API</a> <a class=\'ml-3\' href=\'https://www.nltk.org/\' target=\'_blank\'>nltk library</a>');
+        }else if(method.val() === '3'){
+            genMsg.append('text-based: word2vec<br>Word2vec is built by one-layer neural network. This application uses five different pre-trained neural networks to transfer texts into numuric vecters.<br>' +
+                '<br><ul><li>Google News pretrained network: Google has a implementation of the words embedding. <a href=\'https://code.google.com/archive/p/word2vec/\' target=\'_blank\'>website</a> </li><li>glove 6b: GloVe stands for global vectors for word representation. It is an unsupervised learning algorithm developed by Stanford for generating word embeddings by aggregating global word-word co-occurrence matrix from a corpus. <a href=\'https://nlp.stanford.edu/pubs/glove.pdf\' target=\'_blank\'>references</a></li></ul>* word2vec library only supports cosine similarity; []d means the dimensional of the network');
+        }else if(method.val() === '4'){
+            genMsg.append('text-based: bert');
+        }else if(method.val() === '5'){
+            genMsg.append('Rating-based and text-based:<br>This application combine the rating-based and text-based algorithems by training the linear regression model for all the training dataset.<br> <a href=\'https://scikit-learn.org/stable/auto_examples/linear_model/plot_ols.html\' target=\'_blank\'>sklearn linear regression API</a>');
         }
     }
 

@@ -87,7 +87,7 @@ def word2vec_recommend(username, model):
         similarity[one_similar_user] = model.n_similarity(customer_tokens, user_tokens)
     # get top 15 similar users
     top_similar_users = collections.Counter(similarity).most_common(15)
-    return top_similar_users, recommend_restaurant(similarity, user_dict)
+    return top_similar_users, recommend_restaurant(similarity, user_dict, username)
 
 
 def tokenizer(input_text, wv_model):

@@ -5,6 +5,9 @@ from collections import defaultdict
 
 import numpy as np
 
+from restaurant.models import Customer
+from users.models import User, UserReview
+
 
 def euclidean_sim(vector1, vector2):
     # o distance
@@ -58,7 +61,7 @@ def find_sub_matrix(user_vector, matrix, threshold):
     return sub_matrix
 
 
-def recommend_restaurant(similarity, user_dict):
+def recommend_restaurant(similarity, user_dict, username):
     # get top 15 similar users
     top_similar_users = collections.Counter(similarity).most_common(15)
 
@@ -73,21 +76,29 @@ def recommend_restaurant(similarity, user_dict):
         sub_matrix[one_user[0]] = rating_matrix[one_user[0]]
         top_similar_users_id.append(one_user[0])
     # user_dict.keys() means those restaurants the user came
+    # target user average rating.
+    user_total = 0
+    user_reviews = UserReview.objects.filter(user__username=username)
+    for one in user_reviews:
+        user_total = user_total + float(one.stars)
+    user_average_score = user_total / len(user_dict.keys())
     recommend_weight = dict()
     recommend_total = dict()
 
     for one_user in top_similar_users_id:
-        # print(sub_matrix[one_user])
+        # find average rating for that user
+        customer_average = Customer.objects.get(user_id=one_user).average_stars
         for one_rating in sub_matrix[one_user].keys():
             # calculate the weighted average star rating
-            recommend_weight[one_rating] = recommend_weight.get(one_rating, 0) + similarity[one_user]
-            recommend_total[one_rating] = float(recommend_total.get(one_rating, 0)) + float(
-                sub_matrix[one_user][one_rating]) * similarity[one_user]
+            recommend_weight[one_rating] = float(recommend_weight.get(one_rating, 0)) + abs(similarity[one_user])
+            recommend_total[one_rating] = float(recommend_total.get(one_rating, 0)) + (
+                        float(sub_matrix[one_user][one_rating]) - float(customer_average)) * similarity[one_user]
     recommend_final = dict()
     for one_restaurant in recommend_total.keys():
-        recommend_final[one_restaurant] = recommend_total[one_restaurant]
-    for one_restaurant in recommend_final.keys():
+        recommend_final[one_restaurant] = recommend_total[one_restaurant] / recommend_weight[
+            one_restaurant] + user_average_score
+    for one_restaurant in list(recommend_final):
         if one_restaurant in user_dict.keys():
-            recommend_final[one_restaurant] = 0
+            del recommend_final[one_restaurant]
 
     return collections.Counter(recommend_final).most_common(5)
