@@ -37,7 +37,8 @@
                                class="btn" style="color: grey;">Logout</a>
                         </div>
                     {% else %}
-                        <a class="btn btn-outline-secondary btn-sm" style="color: white;" href="{% url 'login' %}">Login</a>
+                        <a class="btn btn-outline-secondary btn-sm" style="color: white;"
+                           href="{% url 'login' %}">Login</a>
                         <a class="btn btn-success ml-3 btn-sm"
                            href="{% url 'users:register' %}?next={{ request.path }}">Sign
                             Up</a>
@@ -50,20 +51,61 @@
     <div class="container">
         <form method='get' class="form-inline mx-auto" action="{% url 'restaurant:search' %}"
               style="width: 80%;margin-top: 230px;">
-            <div class="input-group" style="width: 85%;">
-                <div class="input-group-prepend ">
-                    <span class="input-group-text form-control" id="basic-addon3" style="font-weight: bold">Find</span>
+            <div class="row" style="width: 100%;">
+                <div class="col-6">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text form-control" id="basic-addon3"
+                                  style="font-weight: bold">Find</span>
+                        </div>
+                        <input class="form-control" type="text" placeholder="Restaurant Name/Category" name="keywords"
+                               aria-describedby="basic-addon3">
+                        {#                <input class="form-control" type="text" placeholder="Address" name="address" >#}
+                    </div>
                 </div>
-                <input class="form-control" type="text" placeholder="Restaurant Name/Category" name="keywords"
-                       aria-describedby="basic-addon3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text form-control" id="basic-addon3" style="font-weight: bold">Near</span>
+                <div class="col-5">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text form-control" id="basic-addon3"
+                                  style="font-weight: bold">City</span>
+                        </div>
+                        <select class="custom-select" name="address" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
+                            <option value="">All cities</option>
+                            <option value="Sun Prairie">Sun Prairie</option>
+                            <option value="Madison">Madison</option>
+                            <option value="Fitchburg">Fitchburg</option>
+                            <option value="Oregon">Oregon</option>
+                            <option value="DeForest">DeForest</option>
+                            <option value="Monona">Monona</option>
+                            <option value="Middleton">Middleton</option>
+                            <option value="Stoughton">Stoughton</option>
+                            <option value="Cottage Grove">Cottage Grove</option>
+                            <option value="Verona">Verona</option>
+                            <option value="Waunakee">Waunakee</option>
+                            <option value="Cross Plains">Cross Plains</option>
+                            <option value="De Forest">De Forest</option>
+                            <option value="Windsor">Windsor</option>
+                            <option value="Mount Horeb">Mount Horeb</option>
+                            <option value="McFarland">McFarland</option>
+                            <option value="Mc Farland">Mc Farland</option>
+                            <option value="Black Earth">Black Earth</option>
+                            <option value="Dane">Dane</option>
+                            <option value="Springfield">Springfield</option>
+                            <option value="Paoli">Paoli</option>
+                            <option value="Belleville">Belleville</option>
+                            <option value="Brooklyn">Brooklyn</option>
+                            <option value="Hawthorne">Hawthorne</option>
+                            <option value="Shorewood Hills">Shorewood Hills</option>
+                        </select>
+                    </div>
                 </div>
-                <input class="form-control" type="text" placeholder="Address" name="address" aria-describedby="basic-addon3">
+                <div class="col-1">
+                    <input type="hidden" name="ordered" value="high-rated">
+                    <input type="hidden" name="page" value="1">
+                    <button type="submit" class="btn btn-outline-info form-control">Search
+                    </button>
+                </div>
             </div>
-            <input type="hidden" name="ordered" value="high-rated">
-            <input type="hidden" name="page" value="1">
-            <button type="submit" class="btn btn-outline-info ml-1 form-control" style="width: 10%">Search</button>
         </form>
     </div>
 </div>
