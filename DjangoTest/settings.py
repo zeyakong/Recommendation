@@ -24,7 +24,7 @@ SECRET_KEY = '%zim98-t(74u%1z@)ku1&f!-y#=yvn=iv7xd51f1%(16(ni@)j'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.58.70.232','capstone.zeya.work','127.0.0.1']
+ALLOWED_HOSTS = ['18.221.39.207','capstone.zeya.work','127.0.0.1']
 
 # Application definition
 
