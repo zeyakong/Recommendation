@@ -11,7 +11,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 import datetime
 
-from algorithms.advanced_text_based_algorithms import load_word2vec_model, word2vec_recommend, linear_regression_model
+from gensim.models import Doc2Vec
+
+from algorithms.advanced_text_based_algorithms import load_word2vec_model, word2vec_recommend, linear_regression_model, \
+    doc2vec_recommend
 from algorithms.rating_based_algorithms import user_cf, rating_recommend
 from algorithms.text_based_algorithms import text_recommend
 from .models import Business, Review
@@ -146,6 +149,11 @@ def generate_rec(request, user_name):
             wv_model = load_word2vec_model(network)
             top_similar_users, top_similar_restaurants = word2vec_recommend(username=request.user.username,
                                                                             model=wv_model)
+        elif method_value == '4':
+            # 4 doc2vec
+            model = Doc2Vec.load('algorithms/doc2vec_model.50d')
+            top_similar_users, top_similar_restaurants = doc2vec_recommend(username=request.user.username,
+                                                                           model=model.wv)
         else:
             # 5 both
             rating_users, text_users, top_similar_restaurants = linear_regression_model(username=request.user.username)

@@ -65,8 +65,8 @@
                             <option value="0">Rating-based</option>
                             <option value="1">Text-based: bag-of-words</option>
                             <option value="2">Text-based: TF-IDF</option>
-                            <option value="3" disabled>Text-based: word2vec</option>
-                            <option value="10" disabled>Text-based: doc2vec</option>
+                            <option value="3">Text-based: word2vec</option>
+                            <option value="4">Text-based: doc2vec</option>
                             <option disabled>Text-based: BERT</option>
                             <option value="5">Rating-based&text-based</option>
                         </select>
@@ -82,7 +82,7 @@
                             <option value="pearson">Pearson coefficient</option>
                         </select>
                     </div>
-                    <div class="input-group mt-2" style="font-size: 17px" id="network_form">
+                    <div class="input-group mt-2" style="font-size: 17px" id="network_form_word2vec">
                         <div class="input-group-prepend">
                             <label class="input-group-text font-weight-bold"
                                    style="font-size: 17px;width:100px;">Network</label>
@@ -93,6 +93,15 @@
                             <option value="glove.6B.100d.txt.word2vec">glove.6B.100d</option>
                             <option value="glove.6B.200d.txt.word2vec">glove.6B.200d</option>
                             <option value="glove.6B.300d.txt.word2vec">glove.6B.300d</option>
+                        </select>
+                    </div>
+                    <div class="input-group mt-2" style="font-size: 17px" id="network_form_doc2vec">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text font-weight-bold"
+                                   style="font-size: 17px;width:100px;">Network</label>
+                        </div>
+                        <select class="custom-select" onchange="openBtn()">
+                            <option value="GoogleNews-vectors-negative300.bin">my doc2vec model.50d</option>
                         </select>
                     </div>
                     <button class="btn btn-primary mt-2" onclick="generate()" id="generate_btn">GENERATE</button>
@@ -185,7 +194,8 @@
     $(function () {
         $("#content").show();
         $("#result").hide();
-        $("#network_form").hide();
+        $("#network_form_word2vec").hide();
+        $("#network_form_doc2vec").hide();
         $("#generate_btn").prop('disabled', true);
         $("#similarity_value").prop("selectedIndex", -1);
         $("#method_value").prop("selectedIndex", -1);
@@ -299,7 +309,8 @@
         let method = $("#method_value");
         let similarity = $("#similarity_value");
         let network = $("#network");
-        let networkForm = $("#network_form");
+        let networkFormWord2vec = $("#network_form_word2vec");
+        let networkFormDoc2vec = $("#network_form_doc2vec");
         let generateBtn = $("#generate_btn");
         let genMsg = $("#generate_msg");
         generateBtn.prop('disabled', true);
@@ -308,12 +319,20 @@
         if (method.val() === '3') {
             similarity.val('cosine');
             similarity.prop('disabled', true);
-            networkForm.show();
+            networkFormWord2vec.show();
+            networkFormDoc2vec.hide();
             network.val('null');
+        } else if (method.val() === '4') {
+            similarity.val('cosine');
+            similarity.prop('disabled', true);
+            networkFormDoc2vec.show();
+            networkFormWord2vec.hide();
+            openBtn();
         } else {
             similarity.prop('disabled', false);
             similarity.val('null');
-            networkForm.hide();
+            networkFormDoc2vec.hide();
+            networkFormWord2vec.hide();
         }
 
         if (method.val() === '0') {
@@ -326,7 +345,7 @@
             genMsg.append('text-based: word2vec<br>Word2vec is built by one-layer neural network. This application uses five different pre-trained neural networks to transfer texts into numuric vecters.<br>' +
                 '<br><ul><li>Google News pretrained network: Google has a implementation of the words embedding. <a href=\'https://code.google.com/archive/p/word2vec/\' target=\'_blank\'>website</a> </li><li>glove 6b: GloVe stands for global vectors for word representation. It is an unsupervised learning algorithm developed by Stanford for generating word embeddings by aggregating global word-word co-occurrence matrix from a corpus. <a href=\'https://nlp.stanford.edu/pubs/glove.pdf\' target=\'_blank\'>references</a></li></ul>* word2vec library only supports cosine similarity; []d means the dimensional of the network');
         } else if (method.val() === '4') {
-            genMsg.append('text-based: bert');
+            genMsg.append('text-based: doc2vec<br>doc2vec is to use word2vec to transfer the whole document to vectors');
         } else if (method.val() === '5') {
             genMsg.append('Rating-based and text-based:<br>This application combine the rating-based and text-based algorithems by training the linear regression model for all the training dataset.<br> <a href=\'https://scikit-learn.org/stable/auto_examples/linear_model/plot_ols.html\' target=\'_blank\'>sklearn linear regression API</a>');
         }

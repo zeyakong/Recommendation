@@ -2,6 +2,7 @@ import collections
 import pprint
 import time
 
+from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from gensim.models import KeyedVectors
 from joblib import load
 from nltk import word_tokenize, PorterStemmer
@@ -136,6 +137,10 @@ def get_score(similar_restaurants, restaurant_id):
             return one[1]
     return 0
 
+
+def doc2vec_recommend(username, model):
+
+    return word2vec_recommend(username, model.wv)
 # if __name__ == '__main__':
 #     print('loading...')
 #     model = load_word2vec_model('glove.6B.50d.txt.word2vec')
