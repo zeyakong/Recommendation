@@ -26,11 +26,10 @@ def train_doc2vec_model():
     print("Finish loading corpus")
 
     print('Start training the model...')
-    # start training the model
+    # start training the model, the corpus is a list of all text reviews
     tagged_data = [TaggedDocument(doc, [i]) for i, doc in enumerate(corpus)]
-
     model = Doc2Vec(tagged_data, vector_size=50, window=8, min_count=1, workers=4)
-    # reduce size
+    # delete temporary file to reduce the size of model
     model.delete_temporary_training_data(keep_doctags_vectors=True, keep_inference=True)
     # save the model into desk
     model.save('doc2vec_model.50d')
