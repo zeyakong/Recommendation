@@ -1,0 +1,3 @@
+scp -i aws.pem algorithms/doc2vec_model.50d ubuntu@18.221.39.207:
+
+
