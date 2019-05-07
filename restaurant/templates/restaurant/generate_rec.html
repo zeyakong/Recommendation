@@ -231,6 +231,10 @@
         let methodValue = $("#method_value").val();
         let similarityValue = $("#similarity_value").val();
         let networkValue = $("#network").val();
+        if (methodValue == 3) {
+            alert("The online version doesn't support word2vec because of the computing limitation.");
+            return
+        }
         $("#result").empty();
         $("#content").hide();
         $("#result").show();

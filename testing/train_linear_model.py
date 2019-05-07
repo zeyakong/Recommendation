@@ -206,7 +206,7 @@ def pearson_sim(vector1, vector2):
 
 
 if __name__ == '__main__':
-    # model_training()
-    model = load('trained_model.joblib')
-    pprint.pprint(model.predict([[4.3, 3.5], [2.5, 3.4]]))
+    model_training()
+    # model = load('trained_model.joblib')
+    # pprint.pprint(model.predict([[4.3, 3.5], [2.5, 3.4]]))
     exit()
