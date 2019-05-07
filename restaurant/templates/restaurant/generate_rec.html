@@ -228,13 +228,14 @@
             alert("the number of reviews " + reviewCount + " is less than 5, please rate more than 5 restaurants to start.");
             return
         }
+
         let methodValue = $("#method_value").val();
         let similarityValue = $("#similarity_value").val();
         let networkValue = $("#network").val();
-        {#if (methodValue == 3) {#}
-        {#    alert("The online version doesn't support word2vec because of the computing limitation.");#}
-        {#    return#}
-        {#}#}
+        if( methodValue=="3" && networkValue!="glove.6B.50d.txt.word2vec"){
+            alert("The online version only supports glove 50d network because of the computing limitation");
+            return;
+        }
         $("#result").empty();
         $("#content").hide();
         $("#result").show();
@@ -357,7 +358,7 @@
             genMsg.append('text-based: TF_IDF<br>TF-IDF, short for term frequency–inverse document frequency, is a statistical method used to assess the importance of a word for a file set or one of the files in a corpus. The importance of a word increases proportionally with the number of times it appears in the file, but it also decreases inversely with the frequency it appears in the corpus.<br><a href=\'https://en.wikipedia.org/wiki/Tf%E2%80%93idf\' target=\'_blank\'>TF-IDF</a> <a class=\'ml-3\' href=\'https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html\' target=\'_blank\'>sklearn API</a> <a class=\'ml-3\' href=\'https://www.nltk.org/\' target=\'_blank\'>nltk library</a>');
         } else if (method.val() === '3') {
             genMsg.append('text-based: word2vec<br>Word2vec is built by one-layer neural network. This application uses five different pre-trained neural networks to transfer texts into numuric vecters.<br>' +
-                '<br><ul><li>Google News pretrained network: Google has a implementation of the words embedding. <a href=\'https://code.google.com/archive/p/word2vec/\' target=\'_blank\'>website</a> </li><li>glove 6b: GloVe stands for global vectors for word representation. It is an unsupervised learning algorithm developed by Stanford for generating word embeddings by aggregating global word-word co-occurrence matrix from a corpus. <a href=\'https://nlp.stanford.edu/pubs/glove.pdf\' target=\'_blank\'>references</a></li></ul>* word2vec library only supports cosine similarity; []d means the dimensional of the network');
+                '<br><ul><li>Google News pretrained network: Google has a implementation of the words embedding. <a href=\'https://code.google.com/archive/p/word2vec/\' target=\'_blank\'>website</a> </li><li>glove 6b: GloVe stands for global vectors for word representation. It is an unsupervised learning algorithm developed by Stanford for generating word embeddings by aggregating global word-word co-occurrence matrix from a corpus. <a href=\'https://nlp.stanford.edu/pubs/glove.pdf\' target=\'_blank\'>references</a></li></ul>* word2vec library only supports cosine similarity; []d means the dimensional of the network.');
         } else if (method.val() === '4') {
             genMsg.append('text-based: doc2vec<br>doc2vec is to use word2vec to transfer the whole document to vectors');
         } else if (method.val() === '5') {
