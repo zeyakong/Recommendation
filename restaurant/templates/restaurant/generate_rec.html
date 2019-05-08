@@ -300,7 +300,7 @@
 
         resultArea.append("<h6 class='mt-3'>Top 5 recommended restaurants:</h6>");
         for (let i = 0; i < data.results.length; i++) {
-            resultArea.append("<div><a href='" + "{% url 'restaurant:detail' business_id=123 %}".replace('123', data.results[i].id) + "' target = '_blank'>" + data.results[i].name + "</a><br> <small>Predict score: " + data.results[i].stars + "<small><div><br>");
+            resultArea.append("<div><a href='" + "{% url 'restaurant:detail' business_id=123 %}".replace('123', data.results[i].id) + "' target = '_blank'>" + data.results[i].name + "</a><br> <small>Predicted score: " + data.results[i].stars + "<small><div><br>");
         }
 
         resultArea.append("<hr><h6 class='mt-3'>console output</h6>");
