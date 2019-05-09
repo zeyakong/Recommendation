@@ -232,8 +232,8 @@
         let methodValue = $("#method_value").val();
         let similarityValue = $("#similarity_value").val();
         let networkValue = $("#network").val();
-        if( methodValue=="3" && networkValue!="glove.6B.50d.txt.word2vec"){
-            alert("The online version only supports glove 50d network because of the computing limitation");
+        if( methodValue=="3" ){
+            alert("The online demo doesn't support Word2vec because of the computing limitation in AWS server");
             return;
         }
         $("#result").empty();
