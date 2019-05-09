@@ -16,6 +16,7 @@
     <!--font-awesome package-->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'common/common.css' %}">
+    <link rel="shortcut icon" href="{% static 'common/favicon.ico' %}" />
     <title>Search Result</title>
 </head>
 <body>
@@ -34,7 +35,7 @@
                     <ul class="navbar-nav">
                         <li class="nav-item">
                             <div class="dropdown">
-                                <a class="nav-link active" id="dropdownMenuButton" href="#"
+                                <a class="nav-link active dropdown-toggle" id="dropdownMenuButton" href="#"
                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Hello: {{ user.username }}
                                 </a>
@@ -66,8 +67,8 @@
             <div class="mt-2 mb-3 form-inline">Filter
                 <select class="custom-select ml-2" style="width:160px;height: 40px;font-size: 15px"
                         onchange="changeOrder()" id="ordered_by">
-                    <option value="high-rated">High-rated</option>
                     <option value="popular">Most popular</option>
+                    <option value="high-rated">High-rated</option>
                 </select>
             </div>
 
@@ -133,7 +134,12 @@
                 <br>
                 4. Click the button
                 <br>
-                <button class="btn btn-sm btn-primary mt-1">Get Recommendations</button>
+                {% if user.username %}
+                    <a class="btn btn-sm btn-primary mt-1" href="{% url 'restaurant:generate_rec' user.username %}">Get Recommendations</a>
+                {% else %}
+                    <a class="btn btn-sm btn-primary mt-1" href="/users/login">Get Recommendations</a>
+                {% endif %}
+
                 <hr>
                 <h5>Algorithms & Tools:</h5>
                 1. Collaborative Filtering(UserCF)
@@ -153,7 +159,6 @@
                 Frameworks: Django 2.1.1, BootStrap 4.1
                 <br>
                 <br>
-
             </div>
 
             <div style="position: fixed;margin-top: 570px; margin-left: 150px;">
@@ -185,8 +190,6 @@
 <script src="{% static 'restaurant/jquery.barrating.min.js' %}"></script>
 <script src="{% static 'restaurant/search_result.js' %}"></script>
 <script type="text/javascript">
-
-
     function changeOrder() {
         window.location.href = "{{ request.path }}" + "?keywords=" + getUrlVars()['keywords'] + "&address=" + getUrlVars()['address'] + "&ordered=" + $("#ordered_by").val() + "&page=" + 1;
     }

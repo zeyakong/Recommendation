@@ -175,7 +175,7 @@ def generate_rec(request, user_name):
         }
         return HttpResponse(json.dumps(content, cls=MyEncoder))
     else:
-        user_review_list = UserReview.objects.filter(user=User.objects.get(username=user_name))
+        user_review_list = UserReview.objects.filter(user=User.objects.get(username=user_name)).order_by('-date')
         context = {
             'user_review_list': user_review_list,
         }

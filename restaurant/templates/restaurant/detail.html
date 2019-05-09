@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
           integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <!--common CSS-->
+    <link rel="shortcut icon" href="{% static 'common/favicon.ico' %}" />
     <link rel="stylesheet" href="{% static 'common/common.css' %}?version=123">
     <!--rating bar-->
     <link rel="stylesheet" href="{% static 'restaurant/fontawesome-stars-o.css' %}?version=1sadas23">
@@ -34,7 +35,7 @@
                     <ul class="navbar-nav">
                         <li class="nav-item">
                             <div class="dropdown">
-                                <a class="nav-link active" id="dropdownMenuButton" href="#"
+                                <a class="nav-link active dropdown-toggle" id="dropdownMenuButton" href="#"
                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Hello: {{ user.username }}
                                 </a>
