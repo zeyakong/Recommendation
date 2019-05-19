@@ -1,5 +1,5 @@
 # Recommendation_Django
-Python recommendation Engine. The app was implemented by Python Django framework. 
+Python recommendation Engine. The app was implemented by Python Django framework. Live demo: [website](http://capstone.zeya.work)
 
 ## About This Project
 This system chose 1619 restaurant samples which located in Wisconsin from the yelp data-set, which includes 26552 customers and 82510 reviews related to those restaurants. All of those are training data. 
