@@ -233,10 +233,6 @@
         let methodValue = $("#method_value").val();
         let similarityValue = $("#similarity_value").val();
         let networkValue = $("#network").val();
-        if( methodValue=="3" ){
-            alert("The online demo doesn't support Word2vec because of the computing limitation in AWS server");
-            return;
-        }
         $("#result").empty();
         $("#content").hide();
         $("#result").show();
