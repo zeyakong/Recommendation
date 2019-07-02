@@ -9,7 +9,7 @@ The aim of this project is to develop a web application to do recommendation acc
 ## Get Started
 Use Git to clone 
 ```
-git clone https://github.com/zeyakong/Recommendation_Django.git
+git clone https://github.com/zeyakong/Recommendation.git
 ```
 or download the whole project zip file.  
 
